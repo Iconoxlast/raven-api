@@ -1,0 +1,4 @@
+spring.application.name=ravenapi
+spring.datasource.url=jdbc:mysql:<insert DB url here>
+spring.datasource.username=<insert DB username here>
+spring.datasource.password=<insert DB user's password here>
