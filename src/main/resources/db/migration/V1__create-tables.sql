@@ -38,7 +38,7 @@ create table character_versions(
     cver_id bigint not null auto_increment PRIMARY KEY,
     cver_char_id bigint not null,
     cver_page_name varchar(100) not null UNIQUE,
-    char_latest_update datetime not null,
+    cver_latest_update datetime not null,
     FOREIGN KEY (cver_char_id) REFERENCES characters(char_id)
 
 );
