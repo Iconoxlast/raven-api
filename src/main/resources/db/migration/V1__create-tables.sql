@@ -17,6 +17,7 @@ create table publishers(
     publ_name varchar(20) not null
 
 );
+INSERT INTO publishers (publ_name) VALUES ('DC'),('Marvel');
 create table characters(
 
     char_id bigint not null auto_increment PRIMARY KEY,
@@ -26,13 +27,6 @@ create table characters(
     FOREIGN KEY (char_publ_id) REFERENCES publishers(publ_id)
 
 );
-create table character_disambiguations(
-
-    char_id bigint not null,
-    cver_id bigint not null,
-    FOREIGN KEY (char_id) REFERENCES characters(char_id),
-    FOREIGN KEY (cver_id) REFERENCES character_versions(cver_id)
-);
 create table character_versions(
 
     cver_id bigint not null auto_increment PRIMARY KEY,
@@ -41,6 +35,13 @@ create table character_versions(
     cver_latest_update datetime not null,
     FOREIGN KEY (cver_publ_id) REFERENCES publishers(publ_id)
 
+);
+create table character_disambiguations(
+
+    char_id bigint not null,
+    cver_id bigint not null,
+    FOREIGN KEY (char_id) REFERENCES characters(char_id),
+    FOREIGN KEY (cver_id) REFERENCES character_versions(cver_id)
 );
 create table issues(
 
