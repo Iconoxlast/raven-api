@@ -53,9 +53,9 @@ create table issues(
 );
 create table character_appearances(
 
-    iss_page_id bigint not null,
+    iss_page_name varchar(100) not null,
     cver_id bigint not null,
-    FOREIGN KEY (iss_page_id) REFERENCES issues(iss_page_id),
+    FOREIGN KEY (iss_page_name) REFERENCES issues(iss_page_name),
     FOREIGN KEY (cver_id) REFERENCES character_versions(cver_id)
 
 );
