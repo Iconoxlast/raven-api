@@ -28,8 +28,8 @@ create table characters(
 );
 create table character_disambiguations(
 
-    char_id bigint not null UNIQUE KEY,
-    cver_id bigint not null UNIQUE KEY,
+    char_id bigint not null,
+    cver_id bigint not null,
     FOREIGN KEY (char_id) REFERENCES characters(char_id),
     FOREIGN KEY (cver_id) REFERENCES character_versions(cver_id)
 );
@@ -37,7 +37,7 @@ create table character_versions(
 
     cver_id bigint not null auto_increment PRIMARY KEY,
     cver_char_id bigint not null,
-    cver_page_name varchar(100) not null,
+    cver_page_name varchar(100) not null UNIQUE,
     char_latest_update datetime not null,
     FOREIGN KEY (cver_char_id) REFERENCES characters(char_id)
 
@@ -46,15 +46,15 @@ create table issues(
 
     iss_page_id bigint not null PRIMARY KEY,
     iss_publ_id bigint not null,
-    iss_page_name varchar(100) not null,
+    iss_page_name varchar(100) not null UNIQUE,
     iss_publication_date date not null, 
     FOREIGN KEY (iss_publ_id) REFERENCES publishers(publ_id)
 
 );
 create table character_appearances(
 
-    iss_page_id bigint not null UNIQUE KEY,
-    cver_id bigint not null UNIQUE KEY,
+    iss_page_id bigint not null,
+    cver_id bigint not null,
     FOREIGN KEY (iss_page_id) REFERENCES issues(iss_page_id),
     FOREIGN KEY (cver_id) REFERENCES character_versions(cver_id)
 
