@@ -1,5 +1,7 @@
 package com.santos.ravenapi.model.dto.search.output;
 
-public record DisambiguationOutput() implements OutputDTO {
+import java.util.List;
+
+public record DisambiguationOutput(List<String> characterVersions) implements OutputDTO {
 
 }
