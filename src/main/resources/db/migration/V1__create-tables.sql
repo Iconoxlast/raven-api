@@ -21,7 +21,7 @@ create table characters(
 
     char_id bigint not null auto_increment PRIMARY KEY,
     char_publ_id bigint not null,
-    char_page_name varchar(100) not null,
+    char_page_name varchar(100) not null UNIQUE,
     char_latest_update datetime not null,
     FOREIGN KEY (char_publ_id) REFERENCES publishers(publ_id)
 
@@ -36,10 +36,10 @@ create table character_disambiguations(
 create table character_versions(
 
     cver_id bigint not null auto_increment PRIMARY KEY,
-    cver_char_id bigint not null,
+    cver_publ_id bigint not null,
     cver_page_name varchar(100) not null UNIQUE,
     cver_latest_update datetime not null,
-    FOREIGN KEY (cver_char_id) REFERENCES characters(char_id)
+    FOREIGN KEY (cver_publ_id) REFERENCES publishers(publ_id)
 
 );
 create table issues(
