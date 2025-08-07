@@ -45,10 +45,12 @@ public class RequestLog {
 	private String reqsClientIp;
 	@Column(name = "reqs_status")
 	private Integer reqsStatus;
+	@Column(name = "reqs_user_agent")
+	private String reqsUserAgent;
 	@Column(name = "reqs_locale")
 	private String reqsLocale;
 	@Column(name = "reqs_response_time")
-	private Integer reqsResponseTime;
+	private Long reqsResponseTime;
 	@Column(name = "reqs_timestamp")
 	private LocalDateTime reqsTimestamp;
 }
