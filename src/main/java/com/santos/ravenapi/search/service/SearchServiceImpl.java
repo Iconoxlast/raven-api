@@ -15,9 +15,9 @@ public class SearchServiceImpl implements SearchService {
 	public OutputDTO getCharacterAppearances(PublisherEnum publisher, String character) {
 		switch (publisher) {
 		case DC:
-			return dcService.getCharacterAppearances(character);
+			return dcService.getCharacterData(character);
 		case MARVEL:
-			return marvelService.getCharacterAppearances(character);
+			return marvelService.getCharacterData(character);
 		default:
 			throw new InvalidPublisherException();
 		}
