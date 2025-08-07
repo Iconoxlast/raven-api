@@ -6,7 +6,7 @@ import com.santos.ravenapi.search.service.PublisherSearchService;
 public class MarvelSearchServiceImpl implements PublisherSearchService {
 
 	@Override
-	public AppearancesOutput getCharacterAppearances(String character) {
+	public AppearancesOutput getCharacterData(String character) {
 		// TODO Auto-generated method stub
 		return null;
 	}

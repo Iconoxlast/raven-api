@@ -4,5 +4,5 @@ import com.santos.ravenapi.model.dto.search.output.OutputDTO;
 
 public interface PublisherSearchService {
 
-	OutputDTO getCharacterAppearances(String character);
+	OutputDTO getCharacterData(String character);
 }
