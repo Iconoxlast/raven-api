@@ -1,5 +1,6 @@
 package com.santos.ravenapi.search.client;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -11,7 +12,8 @@ import com.santos.ravenapi.search.util.QueryFormatter;
 
 @Component
 public class FandomApiClientImpl implements FandomApiClient {
-	
+
+	@Autowired
 	private RestTemplate restTemplate;
 
 	@Override
@@ -25,8 +27,7 @@ public class FandomApiClientImpl implements FandomApiClient {
 			return restTemplate.getForObject(QueryFormatter.characterAppearances(endpoint, character),
 					FandomAppearancesDTO.class);
 		}
-		return restTemplate.getForObject(
-				QueryFormatter.characterAppearancesPagination(endpoint, character, cont),
+		return restTemplate.getForObject(QueryFormatter.characterAppearancesPagination(endpoint, character, cont),
 				FandomAppearancesDTO.class);
 	}
 
