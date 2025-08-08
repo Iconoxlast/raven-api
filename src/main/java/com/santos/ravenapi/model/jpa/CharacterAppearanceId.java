@@ -21,6 +21,6 @@ import lombok.NoArgsConstructor;
 public class CharacterAppearanceId implements Serializable {
 	private static final long serialVersionUID = -2273438213363920036L;
 
-	private Long issPageId;
-	private Long cverId;
+	private Issue issPageId;
+	private CharacterVersion cverId;
 }

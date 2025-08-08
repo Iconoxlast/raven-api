@@ -19,6 +19,6 @@ import lombok.NoArgsConstructor;
 public class CharacterDisambiguationId implements Serializable {
 	private static final long serialVersionUID = -6655821756717687205L;
 
-	private Long charId;
-	private Long cverId;
+	private Character charId;
+	private CharacterVersion cverId;
 }
