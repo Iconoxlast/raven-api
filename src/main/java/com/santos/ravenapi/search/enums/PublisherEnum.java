@@ -9,6 +9,7 @@ public enum PublisherEnum {
 	DC(1), MARVEL(2);
 
 	private int id;
+	private PublisherEndpointEnum endpoint;
 
 	PublisherEnum(int id) {
 		this.id = id;
@@ -16,5 +17,21 @@ public enum PublisherEnum {
 
 	public int getId() {
 		return id;
+	}
+
+	public PublisherEndpointEnum getEndpoint() {
+		if (endpoint == null) {
+			switch (id) {
+			case 1:
+				endpoint = PublisherEndpointEnum.DC;
+				break;
+			case 2:
+				endpoint = PublisherEndpointEnum.MARVEL;
+				break;
+			default:
+				throw new IllegalStateException();
+			}			
+		}
+		return endpoint;
 	}
 }
