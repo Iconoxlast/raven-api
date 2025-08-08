@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.santos.ravenapi.model.dto.search.output.AppearancesOutput;
+import com.santos.ravenapi.model.dto.search.output.OutputDTO;
 import com.santos.ravenapi.search.enums.PublisherEnum;
 import com.santos.ravenapi.search.service.SearchService;
 
@@ -20,6 +22,9 @@ public class SearchController {
 	@GetMapping
 	public ResponseEntity<?> getCharacterAppearances(@RequestParam PublisherEnum publisher,
 			@RequestParam String character) {
-		return ResponseEntity.ok(service.getCharacterAppearances(publisher, character));
+		OutputDTO output = service.getCharacterAppearances(publisher, character);
+		return ResponseEntity.ok()
+				.header("Type", output instanceof AppearancesOutput ? "appearances" : "disambiguation")
+				.body(service.getCharacterAppearances(publisher, character));
 	}
 }
