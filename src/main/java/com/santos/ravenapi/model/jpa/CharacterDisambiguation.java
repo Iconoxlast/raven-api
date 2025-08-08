@@ -34,15 +34,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode(of = { "character", "characterVersion" })
+@EqualsAndHashCode(of = { "charId", "cverId" })
 public class CharacterDisambiguation {
 
 	@Id
 	@ManyToOne
 	@JoinColumn(name = "char_id")
-	private Character character;
+	private Character charId;
 	@Id
 	@ManyToOne
 	@JoinColumn(name = "cver_id")
-	private CharacterVersion characterVersion;
+	private CharacterVersion cverId;
 }

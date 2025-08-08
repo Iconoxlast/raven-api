@@ -27,13 +27,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode(of = { "issPageName", "cverId" })
+@EqualsAndHashCode(of = { "issPageId", "cverId" })
 public class CharacterAppearance {
 
 	@Id
 	@ManyToOne
 	@JoinColumn(name = "iss_page_id")
-	private Issue issPageName;
+	private Issue issPageId;
 	@Id
 	@ManyToOne
 	@JoinColumn(name = "cver_id")
