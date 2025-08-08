@@ -1,15 +1,14 @@
 package com.santos.ravenapi.search.util;
 
+import com.santos.ravenapi.infra.config.AppConfig;
 import com.santos.ravenapi.search.enums.PublisherEndpointEnum;
 
 public class QueryFormatter {
 
-	public static int BUFFER = 500;
-
 	public synchronized static String characterAppearances(PublisherEndpointEnum publisher, String character) {
 		return new StringBuilder(publisher.getUrl())
-				.append("?action=query&format=json&formatversion=2&list=categorymembers&cmlimit=").append(BUFFER)
-				.append("&cmtitle=Category%3A").append(character).append("/Appearances").toString();
+				.append("?action=query&format=json&formatversion=2&list=categorymembers&cmlimit=").append(AppConfig.BUFFER_SIZE)
+				.append("&cmtitle=Category:").append(character).append("/Appearances").toString();
 	}
 
 	public synchronized static String characterAppearancesPagination(PublisherEndpointEnum publisher, String character,
