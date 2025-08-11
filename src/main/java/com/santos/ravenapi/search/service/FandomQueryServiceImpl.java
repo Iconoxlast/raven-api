@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,14 +84,12 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 
 	public DisambiguationOutput getDisambiguation(PublisherEnum publisher, String character) {
 		List<String> characterAliases = new ArrayList<>();
+		List<String> characterVersions = new ArrayList<>();
 		FandomDisambiguationDTO disambiguationDto = null;
 		boolean isRedirectPage = false;
 		do {
 			disambiguationDto = apiClient.queryDisambiguation(publisher.getEndpoint(), character);
-			// -1 key indicates no pages with this title were found on the wiki
-			if (disambiguationDto.query().pages().get("-1") != null) {
-				throw new DisambiguationPageNotFoundException();
-			}
+			validateQueriedPage(disambiguationDto.query().pages());
 			Page page = disambiguationDto.query().pages()
 					.get(disambiguationDto.query().pages().keySet().toArray()[0]);
 			characterAliases.add(page.title());
@@ -100,12 +99,25 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 				character = DisambiguationTextFilter.filterRedirect(revisionContent);
 				continue;
 			}
-			characterAliases.addAll(DisambiguationTextFilter.filterCharacterNames(revisionContent));
+			validateQueriedPageContent(revisionContent);
+			characterVersions.addAll(DisambiguationTextFilter.filterCharacterNames(revisionContent));
 		} while (isRedirectPage);
 		// TODO persist data
-		Collections.sort(characterAliases);
-		return new DisambiguationOutput(characterAliases);
+		Collections.sort(characterVersions);
+		return new DisambiguationOutput(characterVersions);
 	}
 	
+	private void validateQueriedPage(Map<String, Page> pages) {
+		// -1 key indicates no pages with the searched title were found on the wiki
+		if (pages.get("-1") != null) {
+			throw new DisambiguationPageNotFoundException();
+		}
+	}
 	
+	private void validateQueriedPageContent(String content) {
+		// character disambiguation articles generally start with "{{Disambig\n"
+		if (!content.split("\\|")[0].contains("Disambig")) {
+			throw new DisambiguationPageNotFoundException();
+		}
+	}
 }
