@@ -10,5 +10,5 @@ public interface SearchService {
 	
 	OutputDTO getCharacterAppearances(PublisherEnum publisher, String character);
 	
-	DisambiguationOutput getCharacterDisambiguation(PublisherEnum endpoint, String character);
+	DisambiguationOutput getCharacterDisambiguation(PublisherEnum publisher, String character);
 }

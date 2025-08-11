@@ -14,6 +14,7 @@ import com.santos.ravenapi.model.dto.search.output.DisambiguationOutput;
 import com.santos.ravenapi.model.dto.search.output.IssueOutput;
 import com.santos.ravenapi.model.dto.search.output.OutputDTO;
 import com.santos.ravenapi.search.enums.PublisherEnum;
+import com.santos.ravenapi.search.util.CharacterNormalizer;
 
 @Service
 public class SearchServiceImpl implements SearchService {
@@ -22,7 +23,7 @@ public class SearchServiceImpl implements SearchService {
 	private FandomQueryService queryService;
 
 	public OutputDTO getCharacterData(PublisherEnum publisher, String character) {
-		character = character.replace(" ", "_");
+		character = CharacterNormalizer.normalize(character);
 		try {
 			return getCharacterAppearances(publisher, character);
 		} catch (AppearancesNotFoundException e) {
@@ -45,12 +46,13 @@ public class SearchServiceImpl implements SearchService {
 		return new AppearancesOutput(issueDetails.stream().collect(Collectors.groupingBy(IssueOutput::date)));
 	}
 
-	public DisambiguationOutput getCharacterDisambiguation(PublisherEnum endpoint, String character)
+	public DisambiguationOutput getCharacterDisambiguation(PublisherEnum publisher, String character)
 			throws DisambiguationPageNotFoundException {
 		// TODO data persistence to be implemented; it should make a database query
 		// before sending a request to the external API
 
 		// TODO getDisambiguation() method in the FandomQueryService class
-		return null;
+		DisambiguationOutput disambiguation = queryService.getDisambiguation(publisher, character);
+		return disambiguation;
 	}
 }

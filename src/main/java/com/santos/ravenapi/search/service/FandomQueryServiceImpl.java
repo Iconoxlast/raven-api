@@ -2,6 +2,7 @@ package com.santos.ravenapi.search.service;
 
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -9,20 +10,27 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.santos.ravenapi.infra.exception.DisambiguationPageNotFoundException;
 import com.santos.ravenapi.model.dto.search.appearances.CategoryMember;
 import com.santos.ravenapi.model.dto.search.appearances.FandomAppearancesDTO;
+import com.santos.ravenapi.model.dto.search.disambiguation.FandomDisambiguationDTO;
+import com.santos.ravenapi.model.dto.search.disambiguation.Page;
 import com.santos.ravenapi.model.dto.search.issues.Category;
 import com.santos.ravenapi.model.dto.search.issues.FandomIssueDetailsDTO;
+import com.santos.ravenapi.model.dto.search.output.DisambiguationOutput;
 import com.santos.ravenapi.model.dto.search.output.IssueOutput;
 import com.santos.ravenapi.search.client.FandomApiClient;
 import com.santos.ravenapi.search.enums.PublisherEnum;
 import com.santos.ravenapi.search.service.parser.FandomDataParser;
+import com.santos.ravenapi.search.util.DisambiguationTextFilter;
 
 @Service
 public class FandomQueryServiceImpl implements FandomQueryService {
 
 	@Autowired
 	private FandomApiClient apiClient;
+	
+	// TODO add PersistenceService instance
 
 	public List<IssueOutput> getAppearances(PublisherEnum publisher, String character) {
 		List<IssueOutput> appearancesList = new ArrayList<>();
@@ -36,6 +44,7 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 			} while (appearancesDto.cont() != null);
 		}
 		sortAppearancesByPublicationDate(appearancesList);
+		// TODO persist data
 		return appearancesList;
 	}
 
@@ -71,4 +80,32 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 	private void sortAppearancesByPublicationDate(List<IssueOutput> appearancesList) {
 		appearancesList.sort(Comparator.comparing(IssueOutput::date));
 	}
+
+	public DisambiguationOutput getDisambiguation(PublisherEnum publisher, String character) {
+		List<String> characterAliases = new ArrayList<>();
+		FandomDisambiguationDTO disambiguationDto = null;
+		boolean isRedirectPage = false;
+		do {
+			disambiguationDto = apiClient.queryDisambiguation(publisher.getEndpoint(), character);
+			// -1 key indicates no pages with this title were found on the wiki
+			if (disambiguationDto.query().pages().get("-1") != null) {
+				throw new DisambiguationPageNotFoundException();
+			}
+			Page page = disambiguationDto.query().pages()
+					.get(disambiguationDto.query().pages().keySet().toArray()[0]);
+			characterAliases.add(page.title());
+			String revisionContent = page.revisions().get(0).content();
+			isRedirectPage = revisionContent.contains("#REDIRECT");
+			if (isRedirectPage) {
+				character = DisambiguationTextFilter.filterRedirect(revisionContent);
+				continue;
+			}
+			characterAliases.addAll(DisambiguationTextFilter.filterCharacterNames(revisionContent));
+		} while (isRedirectPage);
+		// TODO persist data
+		Collections.sort(characterAliases);
+		return new DisambiguationOutput(characterAliases);
+	}
+	
+	
 }

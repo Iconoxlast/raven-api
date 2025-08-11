@@ -2,15 +2,16 @@ package com.santos.ravenapi.search.service;
 
 import java.util.List;
 
+import com.santos.ravenapi.model.dto.search.output.DisambiguationOutput;
 import com.santos.ravenapi.model.dto.search.output.IssueOutput;
 import com.santos.ravenapi.search.enums.PublisherEnum;
 
 public interface FandomQueryService {
 
 	/**
-	 * Requests a list of a particular character's appearances and each appearance's
-	 * publication date through the FandomApiClient, and returns a list of DTOs
-	 * corresponding to the listed issues.
+	 * Fetches a particular character's listed appearances and their publication
+	 * dates through the FandomApiClient, and returns a list of DTOs corresponding
+	 * to the listed issues.
 	 * 
 	 * @param publisher
 	 * @param character
@@ -18,4 +19,14 @@ public interface FandomQueryService {
 	 */
 	List<IssueOutput> getAppearances(PublisherEnum publisher, String character);
 
+	/**
+	 * Fetches a list of character versions associated with a particular character
+	 * alias through the FandomApiClient, returning a DTO containing the listed
+	 * character versions.
+	 * 
+	 * @param publisher
+	 * @param character
+	 * @return DisambiguationOutput
+	 */
+	DisambiguationOutput getDisambiguation(PublisherEnum publisher, String character);
 }
