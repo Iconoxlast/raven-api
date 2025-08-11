@@ -4,6 +4,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+
 @RestControllerAdvice
 public class ExceptionHandlers {
 
@@ -11,9 +13,10 @@ public class ExceptionHandlers {
 	public ResponseEntity<String> treatCharacterNotFoundException(CharacterNotFoundException e) {
 		return ResponseEntity.notFound().build();
 	}
-	
-	@ExceptionHandler(InvalidPublisherException.class)
-	public ResponseEntity<String> treatInvalidPublisherException(InvalidPublisherException e) {
-		return ResponseEntity.badRequest().body(e.getMessage());
+
+	@ExceptionHandler(InvalidFormatException.class)
+	public ResponseEntity<String> treatInvalidPublisherException(InvalidFormatException e) {
+		return ResponseEntity.badRequest()
+				.body(String.format("Invalid or unavailable publisher. Details: %s", e.getMessage()));
 	}
 }
