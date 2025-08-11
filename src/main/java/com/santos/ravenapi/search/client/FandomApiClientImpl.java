@@ -36,8 +36,8 @@ public class FandomApiClientImpl implements FandomApiClient {
 				FandomIssueDetailsDTO.class);
 	}
 
-	public FandomDisambiguationDTO queryDisambiguation(PublisherEndpointEnum publisher, String character) {
-		return restTemplate.getForObject(QueryFormatter.disambiguationPage(publisher, character),
+	public FandomDisambiguationDTO queryDisambiguation(PublisherEndpointEnum endpoint, String character) {
+		return restTemplate.getForObject(QueryFormatter.disambiguationPage(endpoint, character),
 				FandomDisambiguationDTO.class);
 	}
 
