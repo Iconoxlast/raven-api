@@ -11,6 +11,7 @@ import com.santos.ravenapi.model.dto.search.output.AppearancesOutput;
 import com.santos.ravenapi.model.dto.search.output.OutputDTO;
 import com.santos.ravenapi.search.enums.PublisherEnum;
 import com.santos.ravenapi.search.service.SearchService;
+import com.santos.ravenapi.search.util.CharacterNormalizer;
 
 @RestController
 @RequestMapping("search")
@@ -22,7 +23,7 @@ public class SearchController {
 	@GetMapping
 	public ResponseEntity<?> getCharacterAppearances(@RequestParam PublisherEnum publisher,
 			@RequestParam String character) {
-		OutputDTO output = service.getCharacterData(publisher, character);
+		OutputDTO output = service.getCharacterData(publisher, CharacterNormalizer.normalize(character));
 		return ResponseEntity.ok()
 				.header("Type", output instanceof AppearancesOutput ? "appearances" : "disambiguation").body(output);
 	}

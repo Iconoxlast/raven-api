@@ -1,6 +1,7 @@
 package com.santos.ravenapi.search.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.santos.ravenapi.model.dto.search.output.DisambiguationOutput;
 import com.santos.ravenapi.model.dto.search.output.IssueOutput;
@@ -15,9 +16,9 @@ public interface FandomQueryService {
 	 * 
 	 * @param publisher
 	 * @param character
-	 * @return List<IssueOutput>
+	 * @return Optional<List<IssueOutput>>
 	 */
-	List<IssueOutput> getAppearances(PublisherEnum publisher, String character);
+	Optional<List<IssueOutput>> getAppearances(PublisherEnum publisher, String character);
 
 	/**
 	 * Fetches a list of character versions associated with a particular character
@@ -26,7 +27,7 @@ public interface FandomQueryService {
 	 * 
 	 * @param publisher
 	 * @param character
-	 * @return DisambiguationOutput
+	 * @return Optional<DisambiguationOutput>
 	 */
-	DisambiguationOutput getDisambiguation(PublisherEnum publisher, String character);
+	Optional<DisambiguationOutput> getDisambiguation(PublisherEnum publisher, String character);
 }

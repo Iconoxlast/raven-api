@@ -33,7 +33,7 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 	
 	// TODO add PersistenceService instance
 
-	public List<IssueOutput> getAppearances(PublisherEnum publisher, String character) {
+	public Optional<List<IssueOutput>> getAppearances(PublisherEnum publisher, String character) {
 		List<IssueOutput> appearancesList = new ArrayList<>();
 		FandomAppearancesDTO appearancesDto = apiClient.queryAppearances(publisher.getEndpoint(), character);
 		addAppearancesToList(publisher, appearancesList, appearancesDto.query().categorymembers());
@@ -46,7 +46,7 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 		}
 		sortAppearancesByPublicationDate(appearancesList);
 		// TODO persist data
-		return appearancesList;
+		return Optional.ofNullable(appearancesList.isEmpty() ? null : appearancesList);
 	}
 
 	private void addAppearancesToList(PublisherEnum endpoint, List<IssueOutput> appearancesList,
@@ -82,29 +82,35 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 		appearancesList.sort(Comparator.comparing(IssueOutput::date));
 	}
 
-	public DisambiguationOutput getDisambiguation(PublisherEnum publisher, String character) {
-		List<String> characterAliases = new ArrayList<>();
-		List<String> characterVersions = new ArrayList<>();
-		FandomDisambiguationDTO disambiguationDto = null;
-		boolean isRedirectPage = false;
-		do {
-			disambiguationDto = apiClient.queryDisambiguation(publisher.getEndpoint(), character);
-			validateQueriedPage(disambiguationDto.query().pages());
-			Page page = disambiguationDto.query().pages()
-					.get(disambiguationDto.query().pages().keySet().toArray()[0]);
-			characterAliases.add(page.title());
-			String revisionContent = page.revisions().get(0).content();
-			isRedirectPage = revisionContent.contains("#REDIRECT");
-			if (isRedirectPage) {
-				character = DisambiguationTextFilter.filterRedirect(revisionContent);
-				continue;
-			}
-			validateQueriedPageContent(revisionContent);
-			characterVersions.addAll(DisambiguationTextFilter.filterCharacterNames(revisionContent));
-		} while (isRedirectPage);
-		// TODO persist data
-		Collections.sort(characterVersions);
-		return new DisambiguationOutput(characterVersions);
+	public Optional<DisambiguationOutput> getDisambiguation(PublisherEnum publisher, String character) {
+		DisambiguationOutput output = null;
+		try {
+			List<String> characterAliases = new ArrayList<>();
+			List<String> characterVersions = new ArrayList<>();
+			FandomDisambiguationDTO disambiguationDto = null;
+			boolean isRedirectPage = false;
+			do {
+				disambiguationDto = apiClient.queryDisambiguation(publisher.getEndpoint(), character);
+				validateQueriedPage(disambiguationDto.query().pages());
+				Page page = disambiguationDto.query().pages()
+						.get(disambiguationDto.query().pages().keySet().toArray()[0]);
+				characterAliases.add(page.title());
+				String revisionContent = page.revisions().get(0).content();
+				isRedirectPage = revisionContent.contains("#REDIRECT");
+				if (isRedirectPage) {
+					character = DisambiguationTextFilter.filterRedirect(revisionContent);
+					continue;
+				}
+				validateQueriedPageContent(revisionContent);
+				characterVersions.addAll(DisambiguationTextFilter.filterCharacterNames(revisionContent));
+			} while (isRedirectPage);
+			// TODO persist data
+			Collections.sort(characterVersions);
+			output = new DisambiguationOutput(characterVersions);
+		} catch (DisambiguationPageNotFoundException e) {
+			System.err.println("Character not found"); // TODO temporary
+		}
+		return Optional.ofNullable(output);
 	}
 	
 	private void validateQueriedPage(Map<String, Page> pages) {
