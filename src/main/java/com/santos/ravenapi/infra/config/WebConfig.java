@@ -14,7 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
 	private LoggingInterceptor ipInterceptor;
 	
 	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(ipInterceptor).addPathPatterns("**");
+		registry.addInterceptor(ipInterceptor).addPathPatterns("/**");
 	}
 
 }
