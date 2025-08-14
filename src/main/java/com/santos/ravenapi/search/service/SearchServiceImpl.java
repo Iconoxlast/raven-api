@@ -1,5 +1,6 @@
 package com.santos.ravenapi.search.service;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -10,10 +11,10 @@ import org.springframework.stereotype.Service;
 
 import com.santos.ravenapi.infra.exception.CharacterNotFoundException;
 import com.santos.ravenapi.infra.exception.DisambiguationPageNotFoundException;
-import com.santos.ravenapi.model.dto.search.output.AppearancesOutput;
-import com.santos.ravenapi.model.dto.search.output.DisambiguationOutput;
-import com.santos.ravenapi.model.dto.search.output.IssueOutput;
-import com.santos.ravenapi.model.dto.search.output.OutputDTO;
+import com.santos.ravenapi.model.dto.output.AppearancesOutput;
+import com.santos.ravenapi.model.dto.output.DisambiguationOutput;
+import com.santos.ravenapi.model.dto.output.IssueOutput;
+import com.santos.ravenapi.model.dto.output.OutputDTO;
 import com.santos.ravenapi.search.enums.PublisherEnum;
 
 @Service
@@ -22,23 +23,14 @@ public class SearchServiceImpl implements SearchService {
 	@Autowired
 	private FandomQueryService queryService;
 
-	public OutputDTO getCharacterData(PublisherEnum publisher, String character) {
+	public OutputDTO getCharacterData(PublisherEnum publisher, String character) throws SQLException {
 		// orElseGet() instead of orElse() because orElse() will try both conditions.
 		// orElseGet is a lazy evaluation
 		return getCharacterAppearances(publisher, character).orElseGet(
 				() -> getCharacterDisambiguation(publisher, character).orElseThrow(CharacterNotFoundException::new));
-//		try {
-//			return getCharacterAppearances(publisher, character);
-//		} catch (AppearancesNotFoundException e) {
-//			try {
-//				return getCharacterDisambiguation(publisher, character);
-//			} catch (DisambiguationPageNotFoundException e2) {
-//				throw new CharacterNotFoundException();
-//			}
-//		}
 	}
 
-	public Optional<OutputDTO> getCharacterAppearances(PublisherEnum publisher, String character) {
+	public Optional<OutputDTO> getCharacterAppearances(PublisherEnum publisher, String character) throws SQLException {
 		Optional<List<IssueOutput>> issueDetails = queryService.getAppearances(publisher, character);
 		// TODO data persistence to be implemented; it should make a database query
 		// before sending a request to the external API

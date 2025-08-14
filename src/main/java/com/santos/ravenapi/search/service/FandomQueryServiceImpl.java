@@ -1,5 +1,6 @@
 package com.santos.ravenapi.search.service;
 
+import java.sql.SQLException;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,14 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.santos.ravenapi.infra.exception.DisambiguationPageNotFoundException;
-import com.santos.ravenapi.model.dto.search.appearances.CategoryMember;
-import com.santos.ravenapi.model.dto.search.appearances.FandomAppearancesDTO;
-import com.santos.ravenapi.model.dto.search.disambiguation.FandomDisambiguationDTO;
-import com.santos.ravenapi.model.dto.search.disambiguation.Page;
-import com.santos.ravenapi.model.dto.search.issues.Category;
-import com.santos.ravenapi.model.dto.search.issues.FandomIssueDetailsDTO;
-import com.santos.ravenapi.model.dto.search.output.DisambiguationOutput;
-import com.santos.ravenapi.model.dto.search.output.IssueOutput;
+import com.santos.ravenapi.model.dto.appearances.CategoryMember;
+import com.santos.ravenapi.model.dto.appearances.FandomAppearancesDTO;
+import com.santos.ravenapi.model.dto.disambiguation.FandomDisambiguationDTO;
+import com.santos.ravenapi.model.dto.disambiguation.Page;
+import com.santos.ravenapi.model.dto.issues.Category;
+import com.santos.ravenapi.model.dto.issues.FandomIssueDetailsDTO;
+import com.santos.ravenapi.model.dto.output.DisambiguationOutput;
+import com.santos.ravenapi.model.dto.output.IssueOutput;
+import com.santos.ravenapi.persistence.service.AppearanceService;
 import com.santos.ravenapi.search.client.FandomApiClient;
 import com.santos.ravenapi.search.enums.PublisherEnum;
 import com.santos.ravenapi.search.service.parser.FandomDataParser;
@@ -30,10 +32,20 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 
 	@Autowired
 	private FandomApiClient apiClient;
-	
-	// TODO add PersistenceService instance
+	@Autowired
+	private AppearanceService appearanceService;
 
-	public Optional<List<IssueOutput>> getAppearances(PublisherEnum publisher, String character) {
+	public Optional<List<IssueOutput>> getAppearances(PublisherEnum publisher, String character) throws SQLException {
+		Optional<List<IssueOutput>> appearancesList = appearanceService.getCharacterAppearancesDTO(publisher,
+				character);
+		if (appearancesList.isPresent() && !appearancesList.get().isEmpty()) {
+			return appearancesList;
+		}
+		appearancesList = Optional.of(queryAppearances(publisher, character));
+		return appearancesList.get().isEmpty() ? Optional.empty() : appearancesList;
+	}
+
+	private List<IssueOutput> queryAppearances(PublisherEnum publisher, String character) throws SQLException {
 		List<IssueOutput> appearancesList = new ArrayList<>();
 		FandomAppearancesDTO appearancesDto = apiClient.queryAppearances(publisher.getEndpoint(), character);
 		addAppearancesToList(publisher, appearancesList, appearancesDto.query().categorymembers());
@@ -45,8 +57,8 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 			} while (appearancesDto.cont() != null);
 		}
 		sortAppearancesByPublicationDate(appearancesList);
-		// TODO persist data
-		return Optional.ofNullable(appearancesList.isEmpty() ? null : appearancesList);
+		appearanceService.updateCharacterAppearances(publisher, character, appearancesList);
+		return appearancesList;
 	}
 
 	private void addAppearancesToList(PublisherEnum endpoint, List<IssueOutput> appearancesList,
@@ -70,7 +82,7 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 	 * @param publisher
 	 * @param pageId
 	 */
-	private YearMonth getPublicationDate(PublisherEnum publisher, int pageId) {
+	private YearMonth getPublicationDate(PublisherEnum publisher, long pageId) {
 		FandomIssueDetailsDTO issueDto = apiClient.queryIssueDetails(publisher.getEndpoint(), pageId);
 		Optional<Category> optCategory = issueDto.parse().categories().stream().filter(Category::isCategoryIssueDate)
 				.sorted((cat1, cat2) -> Integer.compare(cat2.category().length(), cat1.category().length()))
@@ -79,6 +91,9 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 	}
 
 	private void sortAppearancesByPublicationDate(List<IssueOutput> appearancesList) {
+		if (appearancesList.isEmpty()) {
+			return;
+		}
 		appearancesList.sort(Comparator.comparing(IssueOutput::date));
 	}
 
@@ -112,14 +127,14 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 		}
 		return Optional.ofNullable(output);
 	}
-	
+
 	private void validateQueriedPage(Map<String, Page> pages) {
 		// -1 key indicates no pages with the searched title were found on the wiki
 		if (pages.get("-1") != null) {
 			throw new DisambiguationPageNotFoundException();
 		}
 	}
-	
+
 	private void validateQueriedPageContent(String content) {
 		// character disambiguation articles generally start with "{{Disambig\n"
 		if (!content.split("\\|")[0].contains("Disambig")) {

@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.santos.ravenapi.model.dto.search.appearances.FandomAppearancesDTO;
-import com.santos.ravenapi.model.dto.search.disambiguation.FandomDisambiguationDTO;
-import com.santos.ravenapi.model.dto.search.issues.FandomIssueDetailsDTO;
+import com.santos.ravenapi.model.dto.appearances.FandomAppearancesDTO;
+import com.santos.ravenapi.model.dto.disambiguation.FandomDisambiguationDTO;
+import com.santos.ravenapi.model.dto.issues.FandomIssueDetailsDTO;
 import com.santos.ravenapi.search.enums.PublisherEndpointEnum;
 import com.santos.ravenapi.search.util.QueryFormatter;
 
@@ -31,7 +31,7 @@ public class FandomApiClientImpl implements FandomApiClient {
 				FandomAppearancesDTO.class);
 	}
 
-	public FandomIssueDetailsDTO queryIssueDetails(PublisherEndpointEnum endpoint, int issueId) {
+	public FandomIssueDetailsDTO queryIssueDetails(PublisherEndpointEnum endpoint, long issueId) {
 		return restTemplate.getForObject(QueryFormatter.issueDetails(endpoint, issueId + ""),
 				FandomIssueDetailsDTO.class);
 	}
