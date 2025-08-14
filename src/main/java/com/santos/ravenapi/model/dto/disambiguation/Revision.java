@@ -1,4 +1,4 @@
-package com.santos.ravenapi.model.dto.search.disambiguation;
+package com.santos.ravenapi.model.dto.disambiguation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

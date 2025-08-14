@@ -1,4 +1,4 @@
-package com.santos.ravenapi.model.dto.search.output;
+package com.santos.ravenapi.model.dto.output;
 
 import java.util.List;
 

@@ -1,5 +1,7 @@
 package com.santos.ravenapi.model.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.santos.ravenapi.model.jpa.CharacterVersion;
@@ -13,4 +15,7 @@ import com.santos.ravenapi.model.jpa.CharacterVersion;
  */
 public interface CharacterVersionRepository extends JpaRepository<CharacterVersion, Long> {
 
+	Optional<CharacterVersion> findByCverPublisher_PublIdAndCverPageName(Long publId, String pageName);
+	
+	Optional<CharacterVersion> findByCverPageName(String pageName);
 }

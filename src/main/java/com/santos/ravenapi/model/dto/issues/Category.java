@@ -1,4 +1,4 @@
-package com.santos.ravenapi.model.dto.search.issues;
+package com.santos.ravenapi.model.dto.issues;
 
 import java.time.Year;
 import java.time.YearMonth;

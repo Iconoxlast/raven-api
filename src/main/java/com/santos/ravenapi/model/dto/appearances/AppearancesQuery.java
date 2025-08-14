@@ -1,4 +1,4 @@
-package com.santos.ravenapi.model.dto.search.appearances;
+package com.santos.ravenapi.model.dto.appearances;
 
 import java.util.List;
 
