@@ -1,10 +1,10 @@
 package com.santos.ravenapi.model.jpa;
 
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -29,7 +29,6 @@ import lombok.Setter;
  */
 @Table(name = "character_disambiguations")
 @Entity(name = "CharacterDisambiguation")
-@IdClass(CharacterDisambiguationId.class)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -37,12 +36,22 @@ import lombok.Setter;
 @EqualsAndHashCode(of = { "charId", "cverId" })
 public class CharacterDisambiguation {
 
-	@Id
+	@EmbeddedId
+	private CharacterDisambiguationId id;
+	@MapsId("charId")
 	@ManyToOne
 	@JoinColumn(name = "char_id")
 	private Character charId;
-	@Id
+	@MapsId("cverId")
 	@ManyToOne
 	@JoinColumn(name = "cver_id")
 	private CharacterVersion cverId;
+
+	public CharacterDisambiguation(Character character, CharacterVersion characterVersion) {
+		super();
+		this.charId = character;
+		this.cverId = characterVersion;
+		this.id = new CharacterDisambiguationId(character.getCharId(), characterVersion.getCverId());
+	}
+
 }

@@ -17,7 +17,7 @@ import com.santos.ravenapi.model.jpa.Issue;
 public interface IssueRepository extends JpaRepository<Issue, Long> {
 
 	@Query(value = """
-			SELECT i FROM character_appearances ca
+			SELECT i.* FROM character_appearances ca
 			JOIN issues i ON ca.iss_page_id=i.iss_page_id
 			WHERE i.iss_publ_id=:publId
 			AND ca.cver_id=:cverId

@@ -5,7 +5,7 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-public record Category(String category) {
+public record Category(String title) {
 
 	/**
 	 * Tests whether the category title indicates an issue's publication date. The
@@ -18,14 +18,15 @@ public record Category(String category) {
 	 */
 	public boolean isCategoryIssueDate() {
 		try {
+			String category = getCategory();
 			if (category.length() < 4) {
 				return false;
 			}
 			try {
-				YearMonth.parse(category, DateTimeFormatter.ofPattern("uuuu,_MMMM", Locale.ENGLISH));
+				YearMonth.parse(category, DateTimeFormatter.ofPattern("uuuu, MMMM", Locale.ENGLISH));
 			} catch (Exception e) {
 				try {
-					YearMonth.parse(category, DateTimeFormatter.ofPattern("MMMM,_uuuu", Locale.ENGLISH));
+					YearMonth.parse(category, DateTimeFormatter.ofPattern("MMMM, uuuu", Locale.ENGLISH));
 				} catch (Exception e2) {
 					Year.parse(category);
 				}
@@ -34,6 +35,10 @@ public record Category(String category) {
 			return false;
 		}
 		return true;
+	}
+
+	public String getCategory() {
+		return title.replace("Category:", "");
 	}
 
 }

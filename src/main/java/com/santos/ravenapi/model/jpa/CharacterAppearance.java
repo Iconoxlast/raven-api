@@ -1,10 +1,10 @@
 package com.santos.ravenapi.model.jpa;
 
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -22,20 +22,27 @@ import lombok.Setter;
  */
 @Table(name = "character_appearances")
 @Entity(name = "CharacterAppearance")
-@IdClass(CharacterAppearanceId.class)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode(of = { "issPageId", "cverId" })
 public class CharacterAppearance {
-
-	@Id
+	@EmbeddedId
+	private CharacterAppearanceId id;
 	@ManyToOne
+	@MapsId("issPageId")
 	@JoinColumn(name = "iss_page_id")
 	private Issue issPageId;
-	@Id
 	@ManyToOne
+	@MapsId("cverId")
 	@JoinColumn(name = "cver_id")
 	private CharacterVersion cverId;
+
+	public CharacterAppearance(Issue issue, CharacterVersion characterVersion) {
+		super();
+		this.issPageId = issue;
+		this.cverId = characterVersion;
+		this.id = new CharacterAppearanceId(issue.getIssPageId(), characterVersion.getCverId());
+	}
 }

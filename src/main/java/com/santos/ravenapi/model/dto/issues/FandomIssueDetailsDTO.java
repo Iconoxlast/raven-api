@@ -1,5 +1,7 @@
 package com.santos.ravenapi.model.dto.issues;
 
-public record FandomIssueDetailsDTO(Parse parse) {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record FandomIssueDetailsDTO(@JsonProperty("continue") Continue cont, Query query) {
 
 }

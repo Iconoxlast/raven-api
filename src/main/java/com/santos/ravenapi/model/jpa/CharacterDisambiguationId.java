@@ -2,6 +2,7 @@ package com.santos.ravenapi.model.jpa;
 
 import java.io.Serializable;
 
+import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -16,9 +17,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@Embeddable
 public class CharacterDisambiguationId implements Serializable {
 	private static final long serialVersionUID = -6655821756717687205L;
 
-	private Character charId;
-	private CharacterVersion cverId;
+	private Long charId;
+	private Long cverId;
 }
