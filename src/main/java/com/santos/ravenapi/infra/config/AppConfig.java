@@ -9,10 +9,15 @@ import org.springframework.context.annotation.Configuration;
 public class AppConfig {
 	
 	public static int BUFFER_SIZE;
+	public static boolean DEBUG_MODE;
 	
 	@Value("${api.pagination.buffer.size}")
 	public void setBufferSize(int buffer) {
 		BUFFER_SIZE = buffer;
 	}
 	
+	@Value("${api.debug.mode}")
+	public void setDebugMode(boolean debugMode) {
+		DEBUG_MODE = debugMode;
+	}
 }
