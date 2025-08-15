@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.santos.ravenapi.infra.config.AppConfig;
 import com.santos.ravenapi.model.jpa.CharacterVersion;
 import com.santos.ravenapi.model.jpa.Publisher;
 import com.santos.ravenapi.model.repository.CharacterVersionRepository;
@@ -22,7 +23,9 @@ public class VersionServiceImpl implements VersionService {
 		try {
 			CharacterVersion characterVersion = new CharacterVersion(null, publisher, character,
 					LocalDateTime.of(1900, 1, 1, 0, 0));
-			versionRepository.save(characterVersion);
+			if (!AppConfig.DEBUG_MODE) {
+				versionRepository.save(characterVersion);				
+			}
 			optCharacterVersion = Optional.of(characterVersion);
 		} catch (Exception e) {
 			/*
@@ -49,6 +52,9 @@ public class VersionServiceImpl implements VersionService {
 	}
 	
 	public void updateCharacterVersion(CharacterVersion updatedRecord) {
+		if (AppConfig.DEBUG_MODE) {
+			return;
+		}
 		versionRepository.save(updatedRecord);
 	}
 }

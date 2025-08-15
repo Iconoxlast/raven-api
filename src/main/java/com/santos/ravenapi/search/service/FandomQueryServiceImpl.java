@@ -8,6 +8,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ import com.santos.ravenapi.model.dto.output.DisambiguationOutput;
 import com.santos.ravenapi.model.dto.output.IssueOutput;
 import com.santos.ravenapi.persistence.service.AppearanceService;
 import com.santos.ravenapi.search.client.FandomApiClient;
+import com.santos.ravenapi.search.enums.PublisherEndpointEnum;
 import com.santos.ravenapi.search.enums.PublisherEnum;
 import com.santos.ravenapi.search.service.parser.FandomDataParser;
 import com.santos.ravenapi.search.util.DisambiguationTextFilter;
@@ -34,38 +38,72 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 	private FandomApiClient apiClient;
 	@Autowired
 	private AppearanceService appearanceService;
+	private final int batchSize = 50;
 
 	public Optional<List<IssueOutput>> getAppearances(PublisherEnum publisher, String character) throws SQLException {
-		Optional<List<IssueOutput>> appearancesList = appearanceService.getCharacterAppearancesDTO(publisher,
-				character);
-		if (appearancesList.isPresent() && !appearancesList.get().isEmpty()) {
-			return appearancesList;
-		}
-		appearancesList = Optional.of(queryAppearances(publisher, character));
-		return appearancesList.get().isEmpty() ? Optional.empty() : appearancesList;
+		List<IssueOutput> appearancesList = queryAppearances(publisher, character);
+		return appearancesList.isEmpty() ? Optional.empty() : Optional.of(appearancesList);
 	}
 
 	private List<IssueOutput> queryAppearances(PublisherEnum publisher, String character) throws SQLException {
 		List<IssueOutput> appearancesList = new ArrayList<>();
-		FandomAppearancesDTO appearancesDto = apiClient.queryAppearances(publisher.getEndpoint(), character);
-		addAppearancesToList(publisher, appearancesList, appearancesDto.query().categorymembers());
-		if (appearancesDto.cont() != null) {
-			do {
-				appearancesDto = apiClient.queryAppearances(publisher.getEndpoint(), character,
-						appearancesDto.cont().cmcontinue());
-				addAppearancesToList(publisher, appearancesList, appearancesDto.query().categorymembers());
-			} while (appearancesDto.cont() != null);
-		}
+		FandomAppearancesDTO appearancesDto = null;
+		do {
+			appearancesDto = appearancesDto == null ? apiClient.queryAppearances(publisher.getEndpoint(), character)
+					: apiClient.queryAppearances(publisher.getEndpoint(), character,
+							appearancesDto.cont().cmcontinue());
+			addAppearancesToList(publisher, appearancesList, appearancesDto.query().categorymembers());
+		} while (appearancesDto.cont() != null);
 		sortAppearancesByPublicationDate(appearancesList);
 		appearanceService.updateCharacterAppearances(publisher, character, appearancesList);
 		return appearancesList;
 	}
 
-	private void addAppearancesToList(PublisherEnum endpoint, List<IssueOutput> appearancesList,
+	private void addAppearancesToList(PublisherEnum publisher, List<IssueOutput> appearancesList,
 			List<CategoryMember> categoryMembers) {
-		categoryMembers.forEach(categoryMember -> appearancesList
-				.add(new IssueOutput(getPublicationDate(endpoint, categoryMember.pageid()), categoryMember.title(),
-						categoryMember.pageid())));
+		Map<Long, IssueDataVO> issuesData = new TreeMap<>();
+
+		List<List<Long>> batches = partitionIdList(
+				categoryMembers.stream().map(categoryMember -> categoryMember.pageid()).toList());
+
+		batches.forEach(batch -> {
+			getIssuesBatchData(publisher.getEndpoint(), batch, issuesData);
+		});
+		appearancesList.addAll(issuesData.entrySet().stream()
+				.map(issueData -> new IssueOutput(
+						issueData.getValue().dateIsSet() ? issueData.getValue().publicationDate : YearMonth.of(1900, 1),
+						issueData.getValue().title, issueData.getKey()))
+				.toList());
+	}
+
+	private void getIssuesBatchData(PublisherEndpointEnum endpoint, List<Long> batch,
+			Map<Long, IssueDataVO> issuesData) {
+		FandomIssueDetailsDTO issuesDto = null;
+		do {
+			issuesDto = issuesDto == null ? issuesDto = apiClient.queryIssueDetails(endpoint, batch)
+					: apiClient.queryIssueDetails(endpoint, batch, issuesDto.cont().clcontinue());
+			issuesDto.query().pages().forEach(page -> {
+				if (page.categories() != null) {
+					issuesData.putIfAbsent(page.pageid(), new IssueDataVO(page.title()));
+					IssueDataVO issueData = issuesData.get(page.pageid());
+					if (!issueData.dateIsSet()) {
+						Optional<Category> optCategory = page
+								.categories().stream().filter(Category::isCategoryIssueDate).sorted((cat1,
+										cat2) -> Integer.compare(cat2.getCategory().length(), cat1.getCategory().length()))
+								.findFirst();
+						if (optCategory.isPresent()) {
+							issueData.publicationDate = FandomDataParser.getYearMonth(optCategory.get().getCategory());
+						}
+					}
+				}
+			});
+		} while (issuesDto.cont() != null);
+	}
+
+	private List<List<Long>> partitionIdList(List<Long> pageIds) {
+		return IntStream.range(0, (pageIds.size() + batchSize - 1) / batchSize)
+				.mapToObj(i -> pageIds.subList(i * batchSize, Math.min((i + 1) * batchSize, pageIds.size())))
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -82,13 +120,13 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 	 * @param publisher
 	 * @param pageId
 	 */
-	private YearMonth getPublicationDate(PublisherEnum publisher, long pageId) {
-		FandomIssueDetailsDTO issueDto = apiClient.queryIssueDetails(publisher.getEndpoint(), pageId);
-		Optional<Category> optCategory = issueDto.parse().categories().stream().filter(Category::isCategoryIssueDate)
-				.sorted((cat1, cat2) -> Integer.compare(cat2.category().length(), cat1.category().length()))
-				.findFirst();
-		return FandomDataParser.getYearMonth(optCategory.isPresent() ? optCategory.get().category() : "");
-	}
+//	private YearMonth getPublicationDate(PublisherEnum publisher, List<Long> pageId) {
+//		FandomIssueDetailsDTO issueDto = apiClient.queryIssueDetails(publisher.getEndpoint(), pageId);
+//		Optional<Category> optCategory = issueDto.parse().categories().stream().filter(Category::isCategoryIssueDate)
+//				.sorted((cat1, cat2) -> Integer.compare(cat2.category().length(), cat1.category().length()))
+//				.findFirst();
+//		return FandomDataParser.getYearMonth(optCategory.isPresent() ? optCategory.get().category() : "");
+//	}
 
 	private void sortAppearancesByPublicationDate(List<IssueOutput> appearancesList) {
 		if (appearancesList.isEmpty()) {
@@ -139,6 +177,19 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 		// character disambiguation articles generally start with "{{Disambig\n"
 		if (!content.split("\\|")[0].contains("Disambig")) {
 			throw new DisambiguationPageNotFoundException();
+		}
+	}
+
+	private class IssueDataVO {
+		final String title;
+		YearMonth publicationDate;
+
+		public IssueDataVO(String title) {
+			this.title = title;
+		}
+
+		public boolean dateIsSet() {
+			return publicationDate != null;
 		}
 	}
 }

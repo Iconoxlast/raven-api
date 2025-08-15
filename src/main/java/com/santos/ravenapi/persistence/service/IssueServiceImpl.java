@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.santos.ravenapi.infra.config.AppConfig;
 import com.santos.ravenapi.model.dto.output.IssueOutput;
 import com.santos.ravenapi.model.jpa.Issue;
 import com.santos.ravenapi.model.jpa.Publisher;
@@ -28,7 +29,9 @@ public class IssueServiceImpl implements IssueService {
 		List<Issue> issuesIncluded = recordedAppearances.isEmpty() ? characterAppearances
 				: characterAppearances.stream().filter(appearance -> !recordedAppearances.contains(appearance))
 						.toList();
-		issueRepository.saveAll(issuesIncluded);
+		if (!AppConfig.DEBUG_MODE) {
+			issueRepository.saveAll(issuesIncluded);
+		}
 		return issuesIncluded;
 	}
 

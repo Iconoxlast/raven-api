@@ -12,10 +12,10 @@ import com.santos.ravenapi.search.enums.PublisherEnum;
 
 public interface AppearanceService {
 
-	Optional<List<CharacterAppearance>> getCharacterAppearances(PublisherEnum publisher, String characterVersion)
+	Optional<List<CharacterAppearance>> getAppearances(PublisherEnum publisher, String characterVersion)
 			throws SQLException;
 
-	Optional<List<IssueOutput>> getCharacterAppearancesDTO(PublisherEnum publisher, String characterVersion);
+	Optional<List<IssueOutput>> getAppearancesDTO(PublisherEnum publisher, String characterVersion);
 
 	void updateCharacterAppearances(PublisherEnum publisherEnum, String character,
 			List<IssueOutput> characterAppearancesDTO) throws SQLException;

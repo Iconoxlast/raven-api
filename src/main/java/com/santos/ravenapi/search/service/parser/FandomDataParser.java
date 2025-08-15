@@ -18,10 +18,10 @@ public class FandomDataParser {
 	 */
 	public synchronized static YearMonth getYearMonth(String category) {
 		try {
-			return YearMonth.parse(category, DateTimeFormatter.ofPattern("uuuu,_MMMM", Locale.ENGLISH));
+			return YearMonth.parse(category, DateTimeFormatter.ofPattern("uuuu, MMMM", Locale.ENGLISH));
 		} catch (Exception e) {
 			try {
-				return YearMonth.parse(category, DateTimeFormatter.ofPattern("MMMM,_uuuu", Locale.ENGLISH));
+				return YearMonth.parse(category, DateTimeFormatter.ofPattern("MMMM, uuuu", Locale.ENGLISH));
 			} catch (Exception e2) {
 				try {
 					return YearMonth.of(Year.parse(category).getValue(), 1);

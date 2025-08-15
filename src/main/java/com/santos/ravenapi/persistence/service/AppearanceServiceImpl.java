@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.santos.ravenapi.infra.config.AppConfig;
 import com.santos.ravenapi.model.dto.output.IssueOutput;
 import com.santos.ravenapi.model.jpa.CharacterAppearance;
 import com.santos.ravenapi.model.jpa.CharacterVersion;
@@ -33,21 +34,21 @@ public class AppearanceServiceImpl implements AppearanceService {
 	private int lastUpdateLimit;
 
 	// may not be used
-	public Optional<List<CharacterAppearance>> getCharacterAppearances(PublisherEnum publisher, String characterVersion)
+	public Optional<List<CharacterAppearance>> getAppearances(PublisherEnum publisher, String characterVersion)
 			throws SQLException {
 		return Optional.of(convertIssuesListToCharacterAppearancesList(
 				issueService.getUpToDateAppearanceIssues(publisher, characterVersion, lastUpdateLimit),
 				versionService.getCharacterVersionByPageName(characterVersion)));
 	}
 
-	public Optional<List<IssueOutput>> getCharacterAppearancesDTO(PublisherEnum publisher, String characterVersion) {
+	public Optional<List<IssueOutput>> getAppearancesDTO(PublisherEnum publisher, String characterVersion) {
 		return Optional.of(issueService.convertEntityListToDtoList(
 				issueService.getUpToDateAppearanceIssues(publisher, characterVersion, lastUpdateLimit)));
 	}
 
 	public void updateCharacterAppearances(PublisherEnum publisherEnum, String character,
 			List<IssueOutput> characterAppearancesDTO) throws SQLException {
-		if (characterAppearancesDTO.isEmpty()) {
+		if (characterAppearancesDTO.isEmpty() || AppConfig.DEBUG_MODE) {
 			return;
 		}
 		Publisher publisher = getPublisherRecord(publisherEnum);
@@ -72,6 +73,9 @@ public class AppearanceServiceImpl implements AppearanceService {
 	}
 
 	public void saveNewAppearances(List<Issue> issues, CharacterVersion character) {
+		if (AppConfig.DEBUG_MODE) {
+			return;
+		}
 		appearanceRepository.saveAll(convertIssuesListToCharacterAppearancesList(issues, character));
 	}
 
@@ -88,7 +92,7 @@ public class AppearanceServiceImpl implements AppearanceService {
 		 * issue. but if recordedAppearances is empty, it means there were no
 		 * appearances recorded in the database prior to this update
 		 */
-		if (recordedAppearances.isEmpty()) {
+		if (recordedAppearances.isEmpty() || AppConfig.DEBUG_MODE) {
 			return;
 		}
 		List<CharacterAppearance> unlistedAppearances = recordedAppearances.stream()

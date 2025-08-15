@@ -1,5 +1,7 @@
 package com.santos.ravenapi.search.util;
 
+import java.util.List;
+
 import com.santos.ravenapi.infra.config.AppConfig;
 import com.santos.ravenapi.search.enums.PublisherEndpointEnum;
 
@@ -17,9 +19,20 @@ public class QueryFormatter {
 				.append(nextPageCode).toString();
 	}
 
-	public synchronized static String issueDetails(PublisherEndpointEnum publisher, String issueId) {
-		return new StringBuilder(publisher.getUrl()).append("?action=parse&format=json&formatversion=2&pageid=")
-				.append(issueId).toString();
+	public synchronized static String issueDetails(PublisherEndpointEnum publisher, List<Long> issueIds) {
+		StringBuilder ids = new StringBuilder();
+		issueIds.forEach(issueId -> {
+			if (ids.length() > 0) {
+				ids.append("|");
+			}
+			ids.append(issueId);			
+		});
+		return new StringBuilder(publisher.getUrl()).append("?action=query&prop=categories&format=json&formatversion=2&cllimit=500&pageids=")
+				.append(ids).toString();
+	}
+	
+	public synchronized static String issueDetailsPagination(PublisherEndpointEnum publisher, List<Long> issueIds, String nextPageCode) {
+		return new StringBuilder(issueDetails(publisher, issueIds)).append("&clcontinue=").append(nextPageCode).toString();
 	}
 
 	public synchronized static String disambiguationPage(PublisherEndpointEnum publisher, String characterAlias) {
