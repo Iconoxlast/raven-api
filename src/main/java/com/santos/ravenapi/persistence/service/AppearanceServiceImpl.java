@@ -16,7 +16,6 @@ import com.santos.ravenapi.model.jpa.CharacterVersion;
 import com.santos.ravenapi.model.jpa.Issue;
 import com.santos.ravenapi.model.jpa.Publisher;
 import com.santos.ravenapi.model.repository.CharacterAppearanceRepository;
-import com.santos.ravenapi.model.repository.PublisherRepository;
 import com.santos.ravenapi.search.enums.PublisherEnum;
 
 @Service
@@ -25,7 +24,7 @@ public class AppearanceServiceImpl implements AppearanceService {
 	@Autowired
 	private CharacterAppearanceRepository appearanceRepository;
 	@Autowired
-	private PublisherRepository publisherRepository;
+	private PublisherService publisherService;
 	@Autowired
 	private IssueService issueService;
 	@Autowired
@@ -36,14 +35,20 @@ public class AppearanceServiceImpl implements AppearanceService {
 	// may not be used
 	public Optional<List<CharacterAppearance>> getAppearances(PublisherEnum publisher, String characterVersion)
 			throws SQLException {
+		Optional<CharacterVersion> optCharacterVersion = versionService.getCharacterVersionByPageName(publisher.getId(),
+				characterVersion);
+		if (optCharacterVersion.isEmpty()) {
+			throw new SQLException(String.format("Character version %s not found in the database", characterVersion));
+		}
 		return Optional.of(convertIssuesListToCharacterAppearancesList(
 				issueService.getUpToDateAppearanceIssues(publisher, characterVersion, lastUpdateLimit),
-				versionService.getCharacterVersionByPageName(characterVersion)));
+				optCharacterVersion.get()));
 	}
 
 	public Optional<List<IssueOutput>> getAppearancesDTO(PublisherEnum publisher, String characterVersion) {
-		return Optional.of(issueService.convertEntityListToDtoList(
-				issueService.getUpToDateAppearanceIssues(publisher, characterVersion, lastUpdateLimit)));
+		List<IssueOutput> issues = issueService.convertEntityListToDtoList(
+				issueService.getUpToDateAppearanceIssues(publisher, characterVersion, lastUpdateLimit));
+		return issues.isEmpty() ? Optional.empty() : Optional.of(issues);
 	}
 
 	public void updateCharacterAppearances(PublisherEnum publisherEnum, String character,
@@ -51,8 +56,8 @@ public class AppearanceServiceImpl implements AppearanceService {
 		if (characterAppearancesDTO.isEmpty() || AppConfig.DEBUG_MODE) {
 			return;
 		}
-		Publisher publisher = getPublisherRecord(publisherEnum);
-		CharacterVersion characterVersion = versionService.saveCharacterVersion(publisher, character);
+		Publisher publisher = publisherService.getPublisherRecord(publisherEnum);
+		CharacterVersion characterVersion = versionService.saveAndGetCharacterVersion(publisher, character).get();
 
 		List<Issue> characterAppearances = issueService.convertDtoListToEntityList(publisher, characterAppearancesDTO);
 		List<Issue> recordedAppearances = issueService.getRecordedCharacterAppearances(publisherEnum,
@@ -62,14 +67,6 @@ public class AppearanceServiceImpl implements AppearanceService {
 		removeUnlistedAppearances(characterAppearances, recordedAppearances, characterVersion);
 		characterVersion.setCverLatestUpdate(LocalDateTime.now());
 		versionService.updateCharacterVersion(characterVersion);
-	}
-
-	private Publisher getPublisherRecord(PublisherEnum publisherEnum) throws SQLException {
-		Optional<Publisher> publisher = publisherRepository.findById(publisherEnum.getId());
-		if (publisher.isEmpty()) {
-			throw new SQLException("Publisher %s's record not found in the database.", publisherEnum.toString());
-		}
-		return publisher.get();
 	}
 
 	public void saveNewAppearances(List<Issue> issues, CharacterVersion character) {

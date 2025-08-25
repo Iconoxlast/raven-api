@@ -2,6 +2,8 @@ package com.santos.ravenapi.persistence.service;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import com.santos.ravenapi.infra.config.AppConfig;
 import com.santos.ravenapi.model.jpa.CharacterVersion;
 import com.santos.ravenapi.model.jpa.Publisher;
 import com.santos.ravenapi.model.repository.CharacterVersionRepository;
+import com.santos.ravenapi.search.enums.PublisherEnum;
 
 @Service
 public class VersionServiceImpl implements VersionService {
@@ -18,39 +21,66 @@ public class VersionServiceImpl implements VersionService {
 	@Autowired
 	private CharacterVersionRepository versionRepository;
 
-	public CharacterVersion saveCharacterVersion(Publisher publisher, String character) throws SQLException {
+	public Optional<CharacterVersion> saveAndGetCharacterVersion(Publisher publisher, String character)
+			throws SQLException {
 		Optional<CharacterVersion> optCharacterVersion = null;
 		try {
-			CharacterVersion characterVersion = new CharacterVersion(null, publisher, character,
-					LocalDateTime.of(1900, 1, 1, 0, 0));
-			if (!AppConfig.DEBUG_MODE) {
-				versionRepository.save(characterVersion);				
-			}
-			optCharacterVersion = Optional.of(characterVersion);
+			optCharacterVersion = saveNewCharacterVersion(publisher, character);
 		} catch (Exception e) {
 			/*
 			 * save() method expected to throw an exception in case a record with the same
 			 * publisher ID and character version name already exists
 			 */
-			optCharacterVersion = versionRepository.findByCverPublisher_PublIdAndCverPageName(publisher.getPublId(),
-					character);
+			optCharacterVersion = getCharacterVersionByPageName(publisher.getPublId(), character);
 		}
 		if (optCharacterVersion.isEmpty()) {
 			throw new SQLException(String.format(
 					"Error in the processing of character version data.\r\nPublisher: %s\r\nCharacter Version: %s",
 					publisher.getPublName(), character));
 		}
-		return optCharacterVersion.get();
+		return optCharacterVersion;
 	}
 
-	public CharacterVersion getCharacterVersionByPageName(String pageName) throws SQLException {
-		Optional<CharacterVersion> characterVersion = versionRepository.findByCverPageName(pageName);
-		if (characterVersion.isEmpty()) {
-			throw new SQLException(String.format("Character version %s not found in the database", pageName));
+	public Optional<CharacterVersion> saveNewCharacterVersion(Publisher publisher, String character)
+			throws SQLException {
+		CharacterVersion characterVersion = new CharacterVersion(null, publisher, character,
+				LocalDateTime.of(1900, 1, 1, 0, 0));
+		if (!AppConfig.DEBUG_MODE) {
+			versionRepository.save(characterVersion);
 		}
-		return characterVersion.get();
+		return Optional.of(characterVersion);
 	}
-	
+
+	public void saveNewCharacterVersions(Publisher publisher, List<String> characterVersions) {
+		List<String> newCharacterVersions = new ArrayList<>();
+		List<String> existingRecords = versionRepository
+				.findByCverPublIdAndCverPageNameIn(publisher.getPublId(), characterVersions).get().stream()
+				.map(version -> version.getCverPageName()).toList();
+		if (existingRecords.isEmpty()) {
+			newCharacterVersions.addAll(characterVersions);
+		} else {
+			newCharacterVersions = characterVersions.stream().filter(version -> !existingRecords.contains(version))
+					.toList();
+		}
+		if (newCharacterVersions.isEmpty()) {
+			return;
+		}
+		versionRepository.saveAllAndFlush(newCharacterVersions.stream()
+				.map(version -> new CharacterVersion(null, publisher, version, LocalDateTime.of(1900, 1, 1, 0, 0)))
+				.toList());
+	}
+
+	public Optional<CharacterVersion> getCharacterVersionByPageName(Long publisherId, String pageName)
+			throws SQLException {
+		return versionRepository.findByCverPublisher_PublIdAndCverPageName(publisherId, pageName);
+	}
+
+	public List<CharacterVersion> getCharacterVersionsByCharacterName(PublisherEnum publisher, String character,
+			int lastUpdateLimit) {
+		return versionRepository.findAllByCharacterNameWithinInterval(publisher.getId(), character,
+				LocalDateTime.now().minusHours(lastUpdateLimit));
+	}
+
 	public void updateCharacterVersion(CharacterVersion updatedRecord) {
 		if (AppConfig.DEBUG_MODE) {
 			return;
