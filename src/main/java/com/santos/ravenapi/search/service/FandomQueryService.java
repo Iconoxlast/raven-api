@@ -30,6 +30,7 @@ public interface FandomQueryService {
 	 * @param publisher
 	 * @param character
 	 * @return Optional<DisambiguationOutput>
+	 * @throws SQLException 
 	 */
-	Optional<DisambiguationOutput> getDisambiguation(PublisherEnum publisher, String character);
+	Optional<DisambiguationOutput> getDisambiguation(PublisherEnum publisher, String character) throws SQLException;
 }

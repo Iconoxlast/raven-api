@@ -1,7 +1,5 @@
 package com.santos.ravenapi.controller;
 
-import java.sql.SQLException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +22,7 @@ public class SearchController {
 
 	@GetMapping
 	public ResponseEntity<?> getCharacterAppearances(@RequestParam PublisherEnum publisher,
-			@RequestParam String character) throws SQLException {
+			@RequestParam String character) {
 		OutputDTO output = service.getCharacterData(publisher, CharacterNormalizer.normalize(character));
 		return ResponseEntity.ok()
 				.header("Type", output instanceof AppearancesOutput ? "appearances" : "disambiguation").body(output);

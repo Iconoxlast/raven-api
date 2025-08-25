@@ -25,6 +25,7 @@ import com.santos.ravenapi.model.dto.issues.FandomIssueDetailsDTO;
 import com.santos.ravenapi.model.dto.output.DisambiguationOutput;
 import com.santos.ravenapi.model.dto.output.IssueOutput;
 import com.santos.ravenapi.persistence.service.AppearanceService;
+import com.santos.ravenapi.persistence.service.DisambiguationService;
 import com.santos.ravenapi.search.client.FandomApiClient;
 import com.santos.ravenapi.search.enums.PublisherEndpointEnum;
 import com.santos.ravenapi.search.enums.PublisherEnum;
@@ -38,6 +39,8 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 	private FandomApiClient apiClient;
 	@Autowired
 	private AppearanceService appearanceService;
+	@Autowired
+	private DisambiguationService disambiguationService;
 	private final int batchSize = 50;
 
 	public Optional<List<IssueOutput>> getAppearances(PublisherEnum publisher, String character) throws SQLException {
@@ -106,28 +109,6 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 				.collect(Collectors.toList());
 	}
 
-	/**
-	 * Assigns a publication date to an issue by querying issue details through an
-	 * API request. Generally an issue's article on a comic book fandom has the
-	 * issue's publication date as one of the article's categories, so the most
-	 * reliable way to get the publication date is by sifting through the
-	 * categories. This method filters out categories that are likely usable
-	 * publication dates (see Category's isCategoryIssueDate() method) and
-	 * prioritizes the most detailed (ex.: "2017, August" over "2017"). Some
-	 * articles may not have a publication month or year listed, and in that case,
-	 * the YearMonth "1900-01" is assigned to them for later treatment.
-	 * 
-	 * @param publisher
-	 * @param pageId
-	 */
-//	private YearMonth getPublicationDate(PublisherEnum publisher, List<Long> pageId) {
-//		FandomIssueDetailsDTO issueDto = apiClient.queryIssueDetails(publisher.getEndpoint(), pageId);
-//		Optional<Category> optCategory = issueDto.parse().categories().stream().filter(Category::isCategoryIssueDate)
-//				.sorted((cat1, cat2) -> Integer.compare(cat2.category().length(), cat1.category().length()))
-//				.findFirst();
-//		return FandomDataParser.getYearMonth(optCategory.isPresent() ? optCategory.get().category() : "");
-//	}
-
 	private void sortAppearancesByPublicationDate(List<IssueOutput> appearancesList) {
 		if (appearancesList.isEmpty()) {
 			return;
@@ -135,7 +116,7 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 		appearancesList.sort(Comparator.comparing(IssueOutput::date));
 	}
 
-	public Optional<DisambiguationOutput> getDisambiguation(PublisherEnum publisher, String character) {
+	public Optional<DisambiguationOutput> getDisambiguation(PublisherEnum publisher, String character) throws SQLException {
 		DisambiguationOutput output = null;
 		try {
 			List<String> characterAliases = new ArrayList<>();
@@ -157,11 +138,14 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 				validateQueriedPageContent(revisionContent);
 				characterVersions.addAll(DisambiguationTextFilter.filterCharacterNames(revisionContent));
 			} while (isRedirectPage);
-			// TODO persist data
+			if (characterVersions.isEmpty()) {
+				throw new DisambiguationPageNotFoundException();
+			}
 			Collections.sort(characterVersions);
+			disambiguationService.updateDisambiguationData(publisher, characterAliases, characterVersions);
 			output = new DisambiguationOutput(characterVersions);
 		} catch (DisambiguationPageNotFoundException e) {
-			System.err.println("Character not found"); // TODO temporary
+			return Optional.empty();
 		}
 		return Optional.ofNullable(output);
 	}

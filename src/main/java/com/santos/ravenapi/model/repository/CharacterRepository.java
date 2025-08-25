@@ -1,6 +1,10 @@
 package com.santos.ravenapi.model.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+
 import com.santos.ravenapi.model.jpa.Character;
 
 /**
@@ -13,4 +17,5 @@ import com.santos.ravenapi.model.jpa.Character;
  */
 public interface CharacterRepository extends JpaRepository<Character, Long> {
 
+	Optional<List<Character>> findByCharPublIdAndCharPageNameIn(Long publId, List<String> pageNames);
 }
