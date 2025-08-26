@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.santos.ravenapi.model.jpa.Issue;
 
@@ -23,7 +24,7 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 			AND ca.cver_id=:cverId
 			ORDER BY i.iss_page_id
 			""", nativeQuery = true)
-	List<Issue> findAllByCharacterAppearances(Long publId, Long cverId);
+	List<Issue> findAllByCharacterAppearances(@Param("publId") Long publId, @Param("cverId") Long cverId);
 
 	@Query(value = """
 			SELECT i.* FROM issues i
@@ -35,5 +36,6 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 			AND cver_latest_update >= :cutoff
 			ORDER BY i.iss_publication_date, i.iss_page_name
 			""", nativeQuery = true)
-	List<Issue> findAllByCharacterVersionWithinInterval(Long publId, String characterVersion, LocalDateTime cutoff);
+	List<Issue> findAllByCharacterVersionWithinInterval(@Param("publId") Long publId,
+			@Param("characterVersion") String characterVersion, @Param("cutoff") LocalDateTime cutoff);
 }

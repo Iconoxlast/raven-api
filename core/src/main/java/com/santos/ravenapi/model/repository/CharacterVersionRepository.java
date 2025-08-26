@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.santos.ravenapi.model.jpa.CharacterVersion;
 
@@ -19,7 +20,7 @@ import com.santos.ravenapi.model.jpa.CharacterVersion;
 public interface CharacterVersionRepository extends JpaRepository<CharacterVersion, Long> {
 
 	Optional<CharacterVersion> findByCverPublisher_PublIdAndCverPageName(Long publId, String pageName);
-	
+
 	Optional<List<CharacterVersion>> findByCverPublisher_PublIdAndCverPageNameIn(Long publId, List<String> pageNames);
 
 	@Query(value = """
@@ -30,5 +31,6 @@ public interface CharacterVersionRepository extends JpaRepository<CharacterVersi
 			AND ch.char_page_name=:character
 			AND ch.char_latest_update >= :cutoff ORDER BY cv.cver_page_name;
 			""", nativeQuery = true)
-	List<CharacterVersion> findAllByCharacterNameWithinInterval(Long publId, String character, LocalDateTime cutoff);
+	List<CharacterVersion> findAllByCharacterNameWithinInterval(@Param("publId") Long publId,
+			@Param("character") String character, @Param("cutoff") LocalDateTime cutoff);
 }

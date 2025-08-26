@@ -21,8 +21,8 @@ public class SearchController {
 	private SearchService service;
 
 	@GetMapping
-	public ResponseEntity<?> getCharacterAppearances(@RequestParam PublisherEnum publisher,
-			@RequestParam String character) {
+	public ResponseEntity<?> getCharacterAppearances(@RequestParam("publisher") PublisherEnum publisher,
+			@RequestParam("character") String character) {
 		OutputDTO output = service.getCharacterData(publisher, CharacterNormalizer.normalize(character));
 		return ResponseEntity.ok()
 				.header("Type", output instanceof AppearancesOutput ? "appearances" : "disambiguation").body(output);
