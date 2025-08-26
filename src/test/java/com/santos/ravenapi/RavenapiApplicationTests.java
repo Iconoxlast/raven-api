@@ -27,7 +27,7 @@ class RavenApiApplicationTests {
 	private FandomQueryService fandomQueryService;
 	
 	@Test
-	void returnsCharacterNotFoundException() {
+	void throwCharacterNotFoundExceptionTest() {
 		OutputDTO output = null;
 		try {
 			output = service.getCharacterData(PublisherEnum.DC, "asdasda");			
@@ -38,7 +38,7 @@ class RavenApiApplicationTests {
 	}
 	
 	@Test
-	void getsCalculatorAppearances() {
+	void getCalculatorAppearancesTest() {
 		Optional<List<IssueOutput>> appearances = Optional.empty();
 		try {
 			appearances = getCharacterAppearances("Noah Kuttler (Prime Earth)");
@@ -50,7 +50,7 @@ class RavenApiApplicationTests {
 	}
 
 	@Test
-	void getsRavenAppearances() {
+	void getRavenAppearancesTest() {
 		Optional<List<IssueOutput>> appearances = Optional.empty();
 		try {
 			appearances = getCharacterAppearances("Raven (Prime Earth)");
@@ -72,5 +72,16 @@ class RavenApiApplicationTests {
 		}
 		System.err.printf("%.4f s\r\n", (double) (Instant.now().toEpochMilli() - startTime) / 1000);
 		return appearances;
+	}
+	
+	@Test
+	void getCharacterDisambiguationsFromFandomTest() {
+		Optional<OutputDTO> output = null;
+		try {
+			output = service.getCharacterDisambiguation(PublisherEnum.DC, "Noah Kuttler");			
+		} catch (Exception e) {
+			System.out.println(e.getClass());
+		}
+		assertThat(output).isPresent();
 	}
 }
