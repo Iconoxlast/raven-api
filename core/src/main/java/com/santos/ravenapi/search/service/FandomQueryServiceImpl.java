@@ -30,7 +30,7 @@ import com.santos.ravenapi.persistence.service.DisambiguationService;
 import com.santos.ravenapi.search.client.FandomApiClient;
 import com.santos.ravenapi.search.enums.PublisherEndpointEnum;
 import com.santos.ravenapi.search.enums.PublisherEnum;
-import com.santos.ravenapi.search.service.parser.FandomDataParser;
+import com.santos.ravenapi.search.service.parser.FandomDateParser;
 import com.santos.ravenapi.search.util.DisambiguationTextFilter;
 
 @Service
@@ -97,7 +97,7 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 										cat2) -> Integer.compare(cat2.getCategory().length(), cat1.getCategory().length()))
 								.findFirst();
 						if (optCategory.isPresent()) {
-							issueData.publicationDate = FandomDataParser.getYearMonth(optCategory.get().getCategory());
+							issueData.publicationDate = FandomDateParser.getYearMonth(optCategory.get().getCategory());
 						}
 					}
 				}

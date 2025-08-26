@@ -1,9 +1,6 @@
 package com.santos.ravenapi.model.dto.issues;
 
-import java.time.Year;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
+import com.santos.ravenapi.search.service.parser.FandomDateParser;
 
 public record Category(String title) {
 
@@ -22,15 +19,7 @@ public record Category(String title) {
 			if (category.length() < 4) {
 				return false;
 			}
-			try {
-				YearMonth.parse(category, DateTimeFormatter.ofPattern("uuuu, MMMM", Locale.ENGLISH));
-			} catch (Exception e) {
-				try {
-					YearMonth.parse(category, DateTimeFormatter.ofPattern("MMMM, uuuu", Locale.ENGLISH));
-				} catch (Exception e2) {
-					Year.parse(category);
-				}
-			}
+			FandomDateParser.getYearMonth(category, false);
 		} catch (Exception e) {
 			return false;
 		}
