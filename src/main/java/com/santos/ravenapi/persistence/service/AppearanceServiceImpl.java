@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.santos.ravenapi.infra.config.AppConfig;
+import com.santos.ravenapi.infra.validation.ArgumentValidator;
 import com.santos.ravenapi.model.dto.output.IssueOutput;
 import com.santos.ravenapi.model.jpa.CharacterAppearance;
 import com.santos.ravenapi.model.jpa.CharacterVersion;
@@ -35,6 +36,7 @@ public class AppearanceServiceImpl implements AppearanceService {
 	// may not be used
 	public Optional<List<CharacterAppearance>> getAppearances(PublisherEnum publisher, String characterVersion)
 			throws SQLException {
+		ArgumentValidator.validate(publisher, characterVersion);
 		Optional<CharacterVersion> optCharacterVersion = versionService.getCharacterVersionByPageName(publisher.getId(),
 				characterVersion);
 		if (optCharacterVersion.isEmpty()) {
@@ -46,6 +48,7 @@ public class AppearanceServiceImpl implements AppearanceService {
 	}
 
 	public Optional<List<IssueOutput>> getAppearancesDTO(PublisherEnum publisher, String characterVersion) {
+		ArgumentValidator.validate(publisher, characterVersion);
 		List<IssueOutput> issues = issueService.convertEntityListToDtoList(
 				issueService.getUpToDateAppearanceIssues(publisher, characterVersion, lastUpdateLimit));
 		return issues.isEmpty() ? Optional.empty() : Optional.of(issues);
@@ -53,6 +56,7 @@ public class AppearanceServiceImpl implements AppearanceService {
 
 	public void updateCharacterAppearances(PublisherEnum publisherEnum, String character,
 			List<IssueOutput> characterAppearancesDTO) throws SQLException {
+		ArgumentValidator.validate(publisherEnum, character, characterAppearancesDTO);
 		if (characterAppearancesDTO.isEmpty() || AppConfig.DEBUG_MODE) {
 			return;
 		}
@@ -70,6 +74,7 @@ public class AppearanceServiceImpl implements AppearanceService {
 	}
 
 	public void saveNewAppearances(List<Issue> issues, CharacterVersion character) {
+		ArgumentValidator.validate(issues, character);
 		if (AppConfig.DEBUG_MODE) {
 			return;
 		}
@@ -89,6 +94,7 @@ public class AppearanceServiceImpl implements AppearanceService {
 		 * issue. but if recordedAppearances is empty, it means there were no
 		 * appearances recorded in the database prior to this update
 		 */
+		ArgumentValidator.validate(characterAppearances, recordedAppearances, character);
 		if (recordedAppearances.isEmpty() || AppConfig.DEBUG_MODE) {
 			return;
 		}

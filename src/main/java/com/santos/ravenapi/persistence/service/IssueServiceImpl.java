@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.santos.ravenapi.infra.config.AppConfig;
+import com.santos.ravenapi.infra.validation.ArgumentValidator;
 import com.santos.ravenapi.model.dto.output.IssueOutput;
 import com.santos.ravenapi.model.jpa.Issue;
 import com.santos.ravenapi.model.jpa.Publisher;
@@ -26,6 +27,7 @@ public class IssueServiceImpl implements IssueService {
 		 * it means there are new appearances to be added to the character's appearance
 		 * list
 		 */
+		ArgumentValidator.validate(characterAppearances, recordedAppearances);
 		List<Issue> issuesIncluded = recordedAppearances.isEmpty() ? characterAppearances
 				: characterAppearances.stream().filter(appearance -> !recordedAppearances.contains(appearance))
 						.toList();
@@ -36,22 +38,26 @@ public class IssueServiceImpl implements IssueService {
 	}
 
 	public List<Issue> convertDtoListToEntityList(Publisher publisher, List<IssueOutput> issuesDto) {
+		ArgumentValidator.validate(publisher, issuesDto);
 		return issuesDto.stream()
 				.map(issueDto -> new Issue(issueDto.id(), publisher, issueDto.title(), issueDto.getLocalDate()))
 				.toList();
 	}
 
 	public List<IssueOutput> convertEntityListToDtoList(List<Issue> issues) {
+		ArgumentValidator.validate(issues);
 		return issues.stream().map(issue -> new IssueOutput(YearMonth.from(issue.getIssPublicationDate()),
 				issue.getIssPageName(), issue.getIssPageId())).toList();
 	}
 
 	public List<Issue> getRecordedCharacterAppearances(PublisherEnum publisher, Long cverId) {
+		ArgumentValidator.validate(publisher, cverId);
 		return issueRepository.findAllByCharacterAppearances(publisher.getId(), cverId);
 	}
 
 	public List<Issue> getUpToDateAppearanceIssues(PublisherEnum publisher, String characterVersion,
 			int lastUpdateLimit) {
+		ArgumentValidator.validate(publisher, characterVersion);
 		return issueRepository.findAllByCharacterVersionWithinInterval(publisher.getId(), characterVersion,
 				LocalDateTime.now().minusHours(lastUpdateLimit));
 	}

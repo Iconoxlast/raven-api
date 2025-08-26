@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.santos.ravenapi.infra.exception.DisambiguationPageNotFoundException;
+import com.santos.ravenapi.infra.validation.ArgumentValidator;
 import com.santos.ravenapi.model.dto.appearances.CategoryMember;
 import com.santos.ravenapi.model.dto.appearances.FandomAppearancesDTO;
 import com.santos.ravenapi.model.dto.disambiguation.FandomDisambiguationDTO;
@@ -44,6 +45,7 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 	private final int batchSize = 50;
 
 	public Optional<List<IssueOutput>> getAppearances(PublisherEnum publisher, String character) throws SQLException {
+		ArgumentValidator.validate(publisher, character);
 		List<IssueOutput> appearancesList = queryAppearances(publisher, character);
 		return appearancesList.isEmpty() ? Optional.empty() : Optional.of(appearancesList);
 	}
@@ -117,6 +119,7 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 	}
 
 	public Optional<DisambiguationOutput> getDisambiguation(PublisherEnum publisher, String character) throws SQLException {
+		ArgumentValidator.validate(publisher, character);
 		DisambiguationOutput output = null;
 		try {
 			List<String> characterAliases = new ArrayList<>();

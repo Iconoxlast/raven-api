@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.santos.ravenapi.infra.validation.ArgumentValidator;
 import com.santos.ravenapi.model.dto.appearances.FandomAppearancesDTO;
 import com.santos.ravenapi.model.dto.disambiguation.FandomDisambiguationDTO;
 import com.santos.ravenapi.model.dto.issues.FandomIssueDetailsDTO;
@@ -23,6 +24,7 @@ public class FandomApiClientImpl implements FandomApiClient {
 	}
 
 	public FandomAppearancesDTO queryAppearances(PublisherEndpointEnum endpoint, String character, String cont) {
+		ArgumentValidator.validate(endpoint, character, cont);
 		if (cont.isEmpty()) {
 			return restTemplate.getForObject(QueryFormatter.characterAppearances(endpoint, character),
 					FandomAppearancesDTO.class);
@@ -36,6 +38,7 @@ public class FandomApiClientImpl implements FandomApiClient {
 	}
 
 	public FandomIssueDetailsDTO queryIssueDetails(PublisherEndpointEnum endpoint, List<Long> issueIds, String cont) {
+		ArgumentValidator.validate(endpoint, issueIds, cont);
 		if (cont.isEmpty()) {
 			return restTemplate.getForObject(QueryFormatter.issueDetails(endpoint, issueIds),
 					FandomIssueDetailsDTO.class);			
@@ -45,6 +48,7 @@ public class FandomApiClientImpl implements FandomApiClient {
 	}
 
 	public FandomDisambiguationDTO queryDisambiguation(PublisherEndpointEnum endpoint, String character) {
+		ArgumentValidator.validate(endpoint, character);
 		return restTemplate.getForObject(QueryFormatter.disambiguationPage(endpoint, character),
 				FandomDisambiguationDTO.class);
 	}

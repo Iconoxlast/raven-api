@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.santos.ravenapi.infra.validation.ArgumentValidator;
 import com.santos.ravenapi.model.jpa.Publisher;
 import com.santos.ravenapi.model.repository.PublisherRepository;
 import com.santos.ravenapi.search.enums.PublisherEnum;
@@ -17,6 +18,7 @@ public class PublisherServiceImpl implements PublisherService {
 	private PublisherRepository publisherRepository;
 
 	public Publisher getPublisherRecord(PublisherEnum publisherEnum) throws SQLException {
+		ArgumentValidator.validate(publisherEnum);
 		Optional<Publisher> publisher = publisherRepository.findById(publisherEnum.getId());
 		if (publisher.isEmpty()) {
 			throw new SQLException("Publisher %s's record not found in the database.", publisherEnum.toString());

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.santos.ravenapi.infra.config.AppConfig;
+import com.santos.ravenapi.infra.validation.ArgumentValidator;
 import com.santos.ravenapi.model.jpa.CharacterVersion;
 import com.santos.ravenapi.model.jpa.Publisher;
 import com.santos.ravenapi.model.repository.CharacterVersionRepository;
@@ -23,6 +24,7 @@ public class VersionServiceImpl implements VersionService {
 
 	public Optional<CharacterVersion> saveAndGetCharacterVersion(Publisher publisher, String character)
 			throws SQLException {
+		ArgumentValidator.validate(publisher, character);
 		Optional<CharacterVersion> optCharacterVersion = null;
 		try {
 			optCharacterVersion = saveNewCharacterVersion(publisher, character);
@@ -43,6 +45,7 @@ public class VersionServiceImpl implements VersionService {
 
 	public Optional<CharacterVersion> saveNewCharacterVersion(Publisher publisher, String character)
 			throws SQLException {
+		ArgumentValidator.validate(publisher, character);
 		CharacterVersion characterVersion = new CharacterVersion(null, publisher, character,
 				LocalDateTime.of(1900, 1, 1, 0, 0));
 		if (!AppConfig.DEBUG_MODE) {
@@ -52,6 +55,7 @@ public class VersionServiceImpl implements VersionService {
 	}
 
 	public void saveNewCharacterVersions(Publisher publisher, List<String> characterVersions) {
+		ArgumentValidator.validate(publisher, characterVersions);
 		if (AppConfig.DEBUG_MODE) {
 			return;
 		}
@@ -73,20 +77,24 @@ public class VersionServiceImpl implements VersionService {
 	}
 
 	public Optional<CharacterVersion> getCharacterVersionByPageName(Long publisherId, String pageName) {
+		ArgumentValidator.validate(publisherId, pageName);
 		return versionRepository.findByCverPublisher_PublIdAndCverPageName(publisherId, pageName);
 	}
 
 	public Optional<List<CharacterVersion>> getCharacterVersionsByPageNames(Long publisherId, List<String> pageNames) {
+		ArgumentValidator.validate(publisherId, pageNames);
 		return versionRepository.findByCverPublisher_PublIdAndCverPageNameIn(publisherId, pageNames);
 	}
 
 	public List<CharacterVersion> getCharacterVersionsByCharacterName(PublisherEnum publisher, String character,
 			int lastUpdateLimit) {
+		ArgumentValidator.validate(publisher, character);
 		return versionRepository.findAllByCharacterNameWithinInterval(publisher.getId(), character,
 				LocalDateTime.now().minusHours(lastUpdateLimit));
 	}
 
 	public void updateCharacterVersion(CharacterVersion updatedRecord) {
+		ArgumentValidator.validate(updatedRecord);
 		if (AppConfig.DEBUG_MODE) {
 			return;
 		}
