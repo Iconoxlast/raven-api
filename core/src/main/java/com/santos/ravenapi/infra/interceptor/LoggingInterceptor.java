@@ -28,7 +28,7 @@ public class LoggingInterceptor implements HandlerInterceptor {
 
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception e) {
 		long requestStartTime = (Long) request.getAttribute("startTime");
-		long responseTime = System.currentTimeMillis() - requestStartTime;
+		Long responseTime = System.currentTimeMillis() - requestStartTime;
 		String ip = getIp(request);
 		String method = request.getMethod();
 		String uri = request.getRequestURI()
@@ -36,7 +36,8 @@ public class LoggingInterceptor implements HandlerInterceptor {
 		int responseStatus = response.getStatus();
 		String userAgent = request.getHeader("User-Agent");
 		String locale = request.getLocale().toString();
-		RequestLog log = new RequestLog(null, method, uri, ip, responseStatus, userAgent, locale, responseTime,
+		RequestLog log = new RequestLog(null, method, uri, ip, responseStatus, userAgent, locale,
+				responseTime.intValue(),
 				LocalDateTime.ofInstant(Instant.ofEpochMilli(requestStartTime), ZoneId.systemDefault()));
 		logRepository.save(log);
 	}

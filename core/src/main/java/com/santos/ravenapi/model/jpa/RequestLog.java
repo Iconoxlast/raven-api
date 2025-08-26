@@ -50,7 +50,7 @@ public class RequestLog {
 	@Column(name = "reqs_locale")
 	private String reqsLocale;
 	@Column(name = "reqs_response_time")
-	private Long reqsResponseTime;
+	private Integer reqsResponseTime;
 	@Column(name = "reqs_timestamp")
 	private LocalDateTime reqsTimestamp;
 }
