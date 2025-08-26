@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.santos.ravenapi.infra.exception.CharacterNotFoundException;
+import com.santos.ravenapi.infra.validation.ArgumentValidator;
 import com.santos.ravenapi.model.dto.output.AppearancesOutput;
 import com.santos.ravenapi.model.dto.output.DisambiguationOutput;
 import com.santos.ravenapi.model.dto.output.IssueOutput;
@@ -36,6 +37,7 @@ public class SearchServiceImpl implements SearchService {
 	private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
 
 	public OutputDTO getCharacterData(PublisherEnum publisher, String character) {
+		ArgumentValidator.validate(publisher, character);
 		// orElseGet() instead of orElse() because orElse() will try both conditions.
 		// orElseGet is a lazy evaluation
 		logger.info(String.format("Character data query: %s, %s, %s", publisher, character,
@@ -45,6 +47,7 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	public Optional<OutputDTO> getCharacterAppearances(PublisherEnum publisher, String character) {
+		ArgumentValidator.validate(publisher, character);
 		// it must make a database query before sending a request to the external API
 		List<IssueOutput> appearancesList = null;
 		try {
@@ -70,8 +73,9 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	/**
-	 * Divides the list by their publication dates, turning the dates into keys on a
-	 * Map. TreeMap used to ensure the keys are ordered chronologically.
+	 * Recollects the list breaking it down by their publication dates, turning the
+	 * dates into keys on a Map. TreeMap used to ensure the keys are ordered
+	 * chronologically.
 	 * 
 	 * @param appearancesList
 	 * @return Optional<OutputDTO>
@@ -85,6 +89,7 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	public Optional<OutputDTO> getCharacterDisambiguation(PublisherEnum publisher, String character) {
+		ArgumentValidator.validate(publisher, character);
 		DisambiguationOutput disambiguation = null;
 		try {
 			disambiguation = disambiguationService.getDisambiguationDTO(publisher, character).get();

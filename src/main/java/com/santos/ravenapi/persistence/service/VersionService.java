@@ -16,8 +16,10 @@ public interface VersionService {
 	
 	void saveNewCharacterVersions(Publisher publisher, List<String> characterVersions);
 
-	Optional<CharacterVersion> getCharacterVersionByPageName(Long publisherId, String pageName) throws SQLException;
+	Optional<CharacterVersion> getCharacterVersionByPageName(Long publisherId, String pageName);
 
+	Optional<List<CharacterVersion>> getCharacterVersionsByPageNames(Long publisherId, List<String> pageNames);
+	
 	List<CharacterVersion> getCharacterVersionsByCharacterName(PublisherEnum publisher, String character,
 			int lastUpdateLimit);
 

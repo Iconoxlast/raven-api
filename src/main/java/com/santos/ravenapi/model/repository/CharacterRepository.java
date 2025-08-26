@@ -17,5 +17,7 @@ import com.santos.ravenapi.model.jpa.Character;
  */
 public interface CharacterRepository extends JpaRepository<Character, Long> {
 
-	Optional<List<Character>> findByCharPublIdAndCharPageNameIn(Long publId, List<String> pageNames);
+	Optional<Character> findByCharPublisher_PublIdAndCharPageName(Long publId, String pageName);
+	
+	Optional<List<Character>> findByCharPublisher_PublIdAndCharPageNameIn(Long publId, List<String> pageNames);
 }

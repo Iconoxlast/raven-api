@@ -52,10 +52,12 @@ public class VersionServiceImpl implements VersionService {
 	}
 
 	public void saveNewCharacterVersions(Publisher publisher, List<String> characterVersions) {
+		if (AppConfig.DEBUG_MODE) {
+			return;
+		}
 		List<String> newCharacterVersions = new ArrayList<>();
-		List<String> existingRecords = versionRepository
-				.findByCverPublIdAndCverPageNameIn(publisher.getPublId(), characterVersions).get().stream()
-				.map(version -> version.getCverPageName()).toList();
+		List<String> existingRecords = getCharacterVersionsByPageNames(publisher.getPublId(), characterVersions).get()
+				.stream().map(version -> version.getCverPageName()).toList();
 		if (existingRecords.isEmpty()) {
 			newCharacterVersions.addAll(characterVersions);
 		} else {
@@ -70,9 +72,12 @@ public class VersionServiceImpl implements VersionService {
 				.toList());
 	}
 
-	public Optional<CharacterVersion> getCharacterVersionByPageName(Long publisherId, String pageName)
-			throws SQLException {
+	public Optional<CharacterVersion> getCharacterVersionByPageName(Long publisherId, String pageName) {
 		return versionRepository.findByCverPublisher_PublIdAndCverPageName(publisherId, pageName);
+	}
+
+	public Optional<List<CharacterVersion>> getCharacterVersionsByPageNames(Long publisherId, List<String> pageNames) {
+		return versionRepository.findByCverPublisher_PublIdAndCverPageNameIn(publisherId, pageNames);
 	}
 
 	public List<CharacterVersion> getCharacterVersionsByCharacterName(PublisherEnum publisher, String character,

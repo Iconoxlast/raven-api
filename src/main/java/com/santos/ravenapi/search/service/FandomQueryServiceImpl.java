@@ -67,10 +67,10 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 		Map<Long, IssueDataVO> issuesData = new TreeMap<>();
 
 		List<List<Long>> batches = partitionIdList(
-				categoryMembers.stream().map(categoryMember -> categoryMember.pageid()).toList());
+				categoryMembers.stream().map(CategoryMember::pageid).toList());
 
 		batches.forEach(batch -> {
-			getIssuesBatchData(publisher.getEndpoint(), batch, issuesData);
+			processIssuesBatchData(publisher.getEndpoint(), batch, issuesData);
 		});
 		appearancesList.addAll(issuesData.entrySet().stream()
 				.map(issueData -> new IssueOutput(
@@ -79,7 +79,7 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 				.toList());
 	}
 
-	private void getIssuesBatchData(PublisherEndpointEnum endpoint, List<Long> batch,
+	private void processIssuesBatchData(PublisherEndpointEnum endpoint, List<Long> batch,
 			Map<Long, IssueDataVO> issuesData) {
 		FandomIssueDetailsDTO issuesDto = null;
 		do {
@@ -121,10 +121,9 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 		try {
 			List<String> characterAliases = new ArrayList<>();
 			List<String> characterVersions = new ArrayList<>();
-			FandomDisambiguationDTO disambiguationDto = null;
 			boolean isRedirectPage = false;
 			do {
-				disambiguationDto = apiClient.queryDisambiguation(publisher.getEndpoint(), character);
+				FandomDisambiguationDTO disambiguationDto = apiClient.queryDisambiguation(publisher.getEndpoint(), character);
 				validateQueriedPage(disambiguationDto.query().pages());
 				Page page = disambiguationDto.query().pages()
 						.get(disambiguationDto.query().pages().keySet().toArray()[0]);

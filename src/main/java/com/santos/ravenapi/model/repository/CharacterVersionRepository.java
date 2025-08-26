@@ -19,10 +19,8 @@ import com.santos.ravenapi.model.jpa.CharacterVersion;
 public interface CharacterVersionRepository extends JpaRepository<CharacterVersion, Long> {
 
 	Optional<CharacterVersion> findByCverPublisher_PublIdAndCverPageName(Long publId, String pageName);
-
-	Optional<CharacterVersion> findByCverPageName(String pageName);
 	
-	Optional<List<CharacterVersion>> findByCverPublIdAndCverPageNameIn(Long publId, List<String> pageNames);
+	Optional<List<CharacterVersion>> findByCverPublisher_PublIdAndCverPageNameIn(Long publId, List<String> pageNames);
 
 	@Query(value = """
 			SELECT cv.* FROM character_disambiguations cd
