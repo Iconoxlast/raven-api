@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -45,61 +46,65 @@ public class SearchServiceImpl implements SearchService {
 
 	public Optional<OutputDTO> getCharacterAppearances(PublisherEnum publisher, String character) {
 		// it must make a database query before sending a request to the external API
-		Optional<List<IssueOutput>> appearancesList = null;
+		List<IssueOutput> appearancesList = null;
 		try {
-			appearancesList = appearanceService.getAppearancesDTO(publisher, character);
-			if (appearancesList.isEmpty()) {
+			appearancesList = appearanceService.getAppearancesDTO(publisher, character).get();
+			logger.info(String.format("Character appearances data retrieved from database. %s, %s, %s", publisher,
+					character, LocalDateTime.now().format(dateFormatter)));
+		} catch (NoSuchElementException e) {
+			try {
 				logger.info(String.format("Character appearances data not found in database. Updating data. %s, %s",
 						publisher, character));
-				appearancesList = queryService.getAppearances(publisher, character);
-				logger.info(appearancesList.isEmpty()
-						? String.format("Character appearances not found in external API. %s, %s", publisher, character)
-								: String.format("Character appearances retrieved from external API. Data updated. %s, %s, %s",
-										publisher, character, LocalDateTime.now().format(dateFormatter)));
-			} else {
-				logger.info(String.format("Character appearances data retrieved from database. %s, %s, %s", publisher,
-						character, LocalDateTime.now().format(dateFormatter)));
+				appearancesList = queryService.getAppearances(publisher, character).get();
+				logger.info(String.format("Character appearances retrieved from external API. Data updated. %s, %s, %s",
+						publisher, character, LocalDateTime.now().format(dateFormatter)));
+			} catch (NoSuchElementException e2) {
+				logger.info(
+						String.format("Character appearances not found in external API. %s, %s", publisher, character));
+			} catch (SQLException e2) {
+				logger.error(e.getMessage());
 			}
-		} catch (SQLException e) {
-			logger.error(e.getMessage());
-			appearancesList = Optional.empty();
 		}
+		//
+		return getAppearancesOutput(appearancesList);
+	}
 
-		// Divides the list by their publication dates, turning the dates into keys on a
-		// Map. TreeMap used to ensure the keys are ordered chronologically
-		return Optional
-				.ofNullable(appearancesList.isPresent()
-						? new AppearancesOutput(appearancesList.get().stream()
-								.collect(Collectors.groupingBy(IssueOutput::date, TreeMap::new, Collectors.toList())))
-						: null);
+	/**
+	 * Divides the list by their publication dates, turning the dates into keys on a
+	 * Map. TreeMap used to ensure the keys are ordered chronologically.
+	 * 
+	 * @param appearancesList
+	 * @return Optional<OutputDTO>
+	 */
+	private Optional<OutputDTO> getAppearancesOutput(List<IssueOutput> appearancesList) {
+		if (appearancesList == null) {
+			return Optional.empty();
+		}
+		return Optional.of(new AppearancesOutput(appearancesList.stream()
+				.collect(Collectors.groupingBy(IssueOutput::date, TreeMap::new, Collectors.toList()))));
 	}
 
 	public Optional<OutputDTO> getCharacterDisambiguation(PublisherEnum publisher, String character) {
-		Optional<DisambiguationOutput> disambiguation = null;
+		DisambiguationOutput disambiguation = null;
 		try {
-			disambiguation = disambiguationService.getDisambiguationDTO(publisher,
-					character);
-			if (disambiguation.isEmpty()) {
+			disambiguation = disambiguationService.getDisambiguationDTO(publisher, character).get();
+			logger.info(String.format("Character disambiguation data retrieved from database. %s, %s, %s", publisher,
+					character, LocalDateTime.now().format(dateFormatter)));
+		} catch (NoSuchElementException e) {
+			try {
 				logger.info(String.format("Character disambiguation data not found in database. Updating data. %s, %s",
 						publisher, character));
-				disambiguation = queryService.getDisambiguation(publisher, character);
-				logger.info(disambiguation.isEmpty()
-						? String.format("Character disambiguation data not found in external API. %s, %s", publisher,
-								character)
-								: String.format(
-										"Character disambiguation data retrieved from external API. Data updated. %s, %s, %s",
-										publisher, character, LocalDateTime.now().format(dateFormatter)));
-			} else {
-				logger.info(String.format("Character disambiguation data retrieved from database. %s, %s, %s", publisher,
-						character, LocalDateTime.now().format(dateFormatter)));
+				disambiguation = queryService.getDisambiguation(publisher, character).get();
+				logger.info(String.format(
+						"Character disambiguation data retrieved from external API. Data updated. %s, %s, %s",
+						publisher, character, LocalDateTime.now().format(dateFormatter)));
+			} catch (NoSuchElementException e2) {
+				logger.info(String.format("Character disambiguation data not found in external API. %s, %s", publisher,
+						character));
+			} catch (SQLException e2) {
+				logger.error(e.getMessage());
 			}
-		} catch (SQLException e) {
-			logger.error(e.getMessage());
-			disambiguation = Optional.empty();
 		}
-		// TODO data persistence to be implemented; it should make a database query
-		// before sending a request to the external API
-
-		return Optional.ofNullable(disambiguation.isPresent() ? disambiguation.get() : null);
+		return Optional.ofNullable(disambiguation);
 	}
 }
