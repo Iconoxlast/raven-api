@@ -33,7 +33,7 @@ public class DisambiguationServiceImpl implements DisambiguationService {
 				character, lastUpdateLimit);
 		return characterVersions.isEmpty() ? Optional.empty()
 				: Optional.of(new DisambiguationOutput(
-						characterVersions.stream().map(version -> version.getCverPageName()).toList()));
+						characterVersions.stream().map(CharacterVersion::getCverPageName).toList()));
 	}
 
 	@Override

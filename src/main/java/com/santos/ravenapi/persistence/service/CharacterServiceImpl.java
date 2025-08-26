@@ -13,14 +13,15 @@ import com.santos.ravenapi.model.repository.CharacterRepository;
 
 @Service
 public class CharacterServiceImpl implements CharacterService {
-	
+
 	@Autowired
 	private CharacterRepository characterRepository;
 
 	public void saveNewCharacterAliases(Publisher publisher, List<String> characterAliases) {
 		List<String> newCharacterAliases = new ArrayList<>();
-		List<String> existingRecords = characterRepository.findByCharPublIdAndCharPageNameIn(publisher.getPublId(), characterAliases).get().stream()
-				.map(alias -> alias.getCharPageName()).toList();
+		List<String> existingRecords = characterRepository
+				.findByCharPublIdAndCharPageNameIn(publisher.getPublId(), characterAliases).get().stream()
+				.map(Character::getCharPageName).toList();
 		if (existingRecords.isEmpty()) {
 			newCharacterAliases.addAll(characterAliases);
 		} else {
@@ -31,7 +32,6 @@ public class CharacterServiceImpl implements CharacterService {
 			return;
 		}
 		characterRepository.saveAllAndFlush(newCharacterAliases.stream()
-				.map(alias -> new Character(null, publisher, alias, LocalDateTime.of(1900, 1, 1, 0, 0)))
-				.toList());
+				.map(alias -> new Character(null, publisher, alias, LocalDateTime.of(1900, 1, 1, 0, 0))).toList());
 	}
 }
