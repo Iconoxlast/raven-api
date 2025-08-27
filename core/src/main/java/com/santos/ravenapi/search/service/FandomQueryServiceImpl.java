@@ -28,7 +28,7 @@ import com.santos.ravenapi.model.dto.output.IssueOutput;
 import com.santos.ravenapi.persistence.service.AppearanceService;
 import com.santos.ravenapi.persistence.service.DisambiguationService;
 import com.santos.ravenapi.search.client.FandomApiClient;
-import com.santos.ravenapi.search.enums.PublisherEndpointEnum;
+import com.santos.ravenapi.search.client.query.PublisherQueryStrategy;
 import com.santos.ravenapi.search.enums.PublisherEnum;
 import com.santos.ravenapi.search.service.parser.FandomDateParser;
 import com.santos.ravenapi.search.util.DisambiguationTextFilter;
@@ -54,9 +54,8 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 		List<IssueOutput> appearancesList = new ArrayList<>();
 		FandomAppearancesDTO appearancesDto = null;
 		do {
-			appearancesDto = appearancesDto == null ? apiClient.queryAppearances(publisher.getEndpoint(), character)
-					: apiClient.queryAppearances(publisher.getEndpoint(), character,
-							appearancesDto.cont().cmcontinue());
+			appearancesDto = appearancesDto == null ? apiClient.queryAppearances(publisher.getQuery(), character)
+					: apiClient.queryAppearances(publisher.getQuery(), character, appearancesDto.cont().cmcontinue());
 			addAppearancesToList(publisher, appearancesList, appearancesDto.query().categorymembers());
 		} while (appearancesDto.cont() != null);
 		sortAppearancesByPublicationDate(appearancesList);
@@ -68,11 +67,10 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 			List<CategoryMember> categoryMembers) {
 		Map<Long, IssueDataVO> issuesData = new TreeMap<>();
 
-		List<List<Long>> batches = partitionIdList(
-				categoryMembers.stream().map(CategoryMember::pageid).toList());
+		List<List<Long>> batches = partitionIdList(categoryMembers.stream().map(CategoryMember::pageid).toList());
 
 		batches.forEach(batch -> {
-			processIssuesBatchData(publisher.getEndpoint(), batch, issuesData);
+			processIssuesBatchData(publisher.getQuery(), batch, issuesData);
 		});
 		appearancesList.addAll(issuesData.entrySet().stream()
 				.map(issueData -> new IssueOutput(
@@ -81,20 +79,20 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 				.toList());
 	}
 
-	private void processIssuesBatchData(PublisherEndpointEnum endpoint, List<Long> batch,
+	private void processIssuesBatchData(PublisherQueryStrategy queryStrategy, List<Long> batch,
 			Map<Long, IssueDataVO> issuesData) {
 		FandomIssueDetailsDTO issuesDto = null;
 		do {
-			issuesDto = issuesDto == null ? issuesDto = apiClient.queryIssueDetails(endpoint, batch)
-					: apiClient.queryIssueDetails(endpoint, batch, issuesDto.cont().clcontinue());
+			issuesDto = issuesDto == null ? issuesDto = apiClient.queryIssueDetails(queryStrategy, batch)
+					: apiClient.queryIssueDetails(queryStrategy, batch, issuesDto.cont().clcontinue());
 			issuesDto.query().pages().forEach(page -> {
 				if (page.categories() != null) {
 					issuesData.putIfAbsent(page.pageid(), new IssueDataVO(page.title()));
 					IssueDataVO issueData = issuesData.get(page.pageid());
 					if (!issueData.dateIsSet()) {
-						Optional<Category> optCategory = page
-								.categories().stream().filter(Category::isCategoryIssueDate).sorted((cat1,
-										cat2) -> Integer.compare(cat2.getCategory().length(), cat1.getCategory().length()))
+						Optional<Category> optCategory = page.categories().stream()
+								.filter(Category::isCategoryIssueDate).sorted((cat1, cat2) -> Integer
+										.compare(cat2.getCategory().length(), cat1.getCategory().length()))
 								.findFirst();
 						if (optCategory.isPresent()) {
 							issueData.publicationDate = FandomDateParser.getYearMonth(optCategory.get().getCategory());
@@ -118,7 +116,8 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 		appearancesList.sort(Comparator.comparing(IssueOutput::date));
 	}
 
-	public Optional<DisambiguationOutput> getDisambiguation(PublisherEnum publisher, String character) throws SQLException {
+	public Optional<DisambiguationOutput> getDisambiguation(PublisherEnum publisher, String character)
+			throws SQLException {
 		ArgumentValidator.validate(publisher, character);
 		DisambiguationOutput output = null;
 		try {
@@ -126,7 +125,8 @@ public class FandomQueryServiceImpl implements FandomQueryService {
 			List<String> characterVersions = new ArrayList<>();
 			boolean isRedirectPage = false;
 			do {
-				FandomDisambiguationDTO disambiguationDto = apiClient.queryDisambiguation(publisher.getEndpoint(), character);
+				FandomDisambiguationDTO disambiguationDto = apiClient.queryDisambiguation(publisher.getQuery(),
+						character);
 				validateQueriedPage(disambiguationDto.query().pages());
 				Page page = disambiguationDto.query().pages()
 						.get(disambiguationDto.query().pages().keySet().toArray()[0]);

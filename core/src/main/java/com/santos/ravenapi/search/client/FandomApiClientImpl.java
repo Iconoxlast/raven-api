@@ -10,8 +10,7 @@ import com.santos.ravenapi.infra.validation.ArgumentValidator;
 import com.santos.ravenapi.model.dto.appearances.FandomAppearancesDTO;
 import com.santos.ravenapi.model.dto.disambiguation.FandomDisambiguationDTO;
 import com.santos.ravenapi.model.dto.issues.FandomIssueDetailsDTO;
-import com.santos.ravenapi.search.enums.PublisherEndpointEnum;
-import com.santos.ravenapi.search.util.QueryFormatter;
+import com.santos.ravenapi.search.client.query.PublisherQueryStrategy;
 
 @Component
 public class FandomApiClientImpl implements FandomApiClient {
@@ -19,38 +18,36 @@ public class FandomApiClientImpl implements FandomApiClient {
 	@Autowired
 	private RestTemplate restTemplate;
 
-	public FandomAppearancesDTO queryAppearances(PublisherEndpointEnum endpoint, String character) {
-		return queryAppearances(endpoint, character, "");
+	public FandomAppearancesDTO queryAppearances(PublisherQueryStrategy queryStrategy, String character) {
+		return queryAppearances(queryStrategy, character, "");
 	}
 
-	public FandomAppearancesDTO queryAppearances(PublisherEndpointEnum endpoint, String character, String cont) {
-		ArgumentValidator.validate(endpoint, character, cont);
+	public FandomAppearancesDTO queryAppearances(PublisherQueryStrategy queryStrategy, String character, String cont) {
+		ArgumentValidator.validate(queryStrategy, character, cont);
 		if (cont.isEmpty()) {
-			return restTemplate.getForObject(QueryFormatter.characterAppearances(endpoint, character),
-					FandomAppearancesDTO.class);
+			return restTemplate.getForObject(queryStrategy.characterAppearances(character), FandomAppearancesDTO.class);
 		}
-		return restTemplate.getForObject(QueryFormatter.characterAppearancesPagination(endpoint, character, cont),
+		return restTemplate.getForObject(queryStrategy.characterAppearancesPagination(character, cont),
 				FandomAppearancesDTO.class);
 	}
-	
-	public FandomIssueDetailsDTO queryIssueDetails(PublisherEndpointEnum endpoint, List<Long> issueIds) {
-		return queryIssueDetails(endpoint, issueIds, "");
+
+	public FandomIssueDetailsDTO queryIssueDetails(PublisherQueryStrategy queryStrategy, List<Long> issueIds) {
+		return queryIssueDetails(queryStrategy, issueIds, "");
 	}
 
-	public FandomIssueDetailsDTO queryIssueDetails(PublisherEndpointEnum endpoint, List<Long> issueIds, String cont) {
-		ArgumentValidator.validate(endpoint, issueIds, cont);
+	public FandomIssueDetailsDTO queryIssueDetails(PublisherQueryStrategy queryStrategy, List<Long> issueIds,
+			String cont) {
+		ArgumentValidator.validate(queryStrategy, issueIds, cont);
 		if (cont.isEmpty()) {
-			return restTemplate.getForObject(QueryFormatter.issueDetails(endpoint, issueIds),
-					FandomIssueDetailsDTO.class);			
+			return restTemplate.getForObject(queryStrategy.issueDetails(issueIds), FandomIssueDetailsDTO.class);
 		}
-		return restTemplate.getForObject(QueryFormatter.issueDetailsPagination(endpoint, issueIds, cont),
-				FandomIssueDetailsDTO.class);			
+		return restTemplate.getForObject(queryStrategy.issueDetailsPagination(issueIds, cont),
+				FandomIssueDetailsDTO.class);
 	}
 
-	public FandomDisambiguationDTO queryDisambiguation(PublisherEndpointEnum endpoint, String character) {
-		ArgumentValidator.validate(endpoint, character);
-		return restTemplate.getForObject(QueryFormatter.disambiguationPage(endpoint, character),
-				FandomDisambiguationDTO.class);
+	public FandomDisambiguationDTO queryDisambiguation(PublisherQueryStrategy queryStrategy, String character) {
+		ArgumentValidator.validate(queryStrategy, character);
+		return restTemplate.getForObject(queryStrategy.disambiguationPage(character), FandomDisambiguationDTO.class);
 	}
 
 }

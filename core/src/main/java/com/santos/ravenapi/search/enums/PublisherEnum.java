@@ -1,37 +1,30 @@
 package com.santos.ravenapi.search.enums;
 
+import com.santos.ravenapi.search.client.query.DcQueryStrategy;
+import com.santos.ravenapi.search.client.query.MarvelQueryStrategy;
+import com.santos.ravenapi.search.client.query.PublisherQueryStrategy;
+
 /**
  * Enum that not only lists the publishers available for queries, but their
  * respective IDs in the database's "publishers" table.
  */
 public enum PublisherEnum {
 
-	DC(1), MARVEL(2);
+	DC(1, new DcQueryStrategy()), MARVEL(2, new MarvelQueryStrategy());
 
-	private int id;
-	private PublisherEndpointEnum endpoint;
+	private long id;
+	private PublisherQueryStrategy strategy;
 
-	PublisherEnum(int id) {
+	PublisherEnum(long id, PublisherQueryStrategy strategy) {
 		this.id = id;
+		this.strategy = strategy;
 	}
 
 	public long getId() {
 		return id;
 	}
 
-	public PublisherEndpointEnum getEndpoint() {
-		if (endpoint == null) {
-			switch (id) {
-			case 1:
-				endpoint = PublisherEndpointEnum.DC;
-				break;
-			case 2:
-				endpoint = PublisherEndpointEnum.MARVEL;
-				break;
-			default:
-				throw new IllegalStateException();
-			}			
-		}
-		return endpoint;
+	public PublisherQueryStrategy getQuery() {
+		return strategy;
 	}
 }
