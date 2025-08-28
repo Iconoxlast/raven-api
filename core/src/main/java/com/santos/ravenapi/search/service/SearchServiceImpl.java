@@ -28,11 +28,11 @@ import com.santos.ravenapi.search.enums.PublisherEnum;
 public class SearchServiceImpl implements SearchService {
 
 	@Autowired
-	private FandomQueryService queryService;
-	@Autowired
 	private AppearanceService appearanceService;
 	@Autowired
 	private DisambiguationService disambiguationService;
+	@Autowired
+	private FandomServiceRegistry serviceRegistry;
 	private static final Logger logger = LoggerFactory.getLogger(SearchServiceImpl.class);
 	private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
 
@@ -58,7 +58,7 @@ public class SearchServiceImpl implements SearchService {
 			try {
 				logger.info(String.format("Character appearances data not found in database. Updating data. %s, %s",
 						publisher, character));
-				appearancesList = queryService.getAppearances(publisher, character).get();
+				appearancesList = serviceRegistry.getService(publisher).getAppearances(character).get();
 				logger.info(String.format("Character appearances retrieved from external API. Data updated. %s, %s, %s",
 						publisher, character, LocalDateTime.now().format(dateFormatter)));
 			} catch (NoSuchElementException e2) {
@@ -99,7 +99,7 @@ public class SearchServiceImpl implements SearchService {
 			try {
 				logger.info(String.format("Character disambiguation data not found in database. Updating data. %s, %s",
 						publisher, character));
-				disambiguation = queryService.getDisambiguation(publisher, character).get();
+				disambiguation = serviceRegistry.getService(publisher).getDisambiguation(character).get();
 				logger.info(String.format(
 						"Character disambiguation data retrieved from external API. Data updated. %s, %s, %s",
 						publisher, character, LocalDateTime.now().format(dateFormatter)));

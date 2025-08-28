@@ -40,7 +40,7 @@ public class IssueServiceImpl implements IssueService {
 	public List<Issue> convertDtoListToEntityList(Publisher publisher, List<IssueOutput> issuesDto) {
 		ArgumentValidator.validate(publisher, issuesDto);
 		return issuesDto.stream()
-				.map(issueDto -> new Issue(issueDto.id(), publisher, issueDto.title(), issueDto.getLocalDate()))
+				.map(issueDto -> new Issue(issueDto.id(), publisher, issueDto.title(), issueDto.date().atDay(1)))
 				.toList();
 	}
 

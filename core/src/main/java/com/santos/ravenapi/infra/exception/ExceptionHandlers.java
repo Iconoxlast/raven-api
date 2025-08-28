@@ -28,6 +28,7 @@ public class ExceptionHandlers {
 
 	@ExceptionHandler(SQLException.class)
 	public ResponseEntity<String> treatSQLException(SQLException e) {
+		e.printStackTrace();
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 				.body(ResponseBodyBuilder.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error",
 						String.format("Database error. Details: %s", e.getMessage())));
@@ -35,6 +36,7 @@ public class ExceptionHandlers {
 
 	@ExceptionHandler(NullPointerException.class)
 	public ResponseEntity<String> treatNullPointerException(NullPointerException e) {
+		e.printStackTrace();
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 				.body(ResponseBodyBuilder.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error",
 						String.format("Application error. Details: %s", e.getMessage())));
