@@ -14,7 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import com.santos.ravenapi.model.dto.output.IssueOutput;
 import com.santos.ravenapi.model.dto.output.OutputDTO;
 import com.santos.ravenapi.search.enums.PublisherEnum;
-import com.santos.ravenapi.search.service.FandomQueryService;
+import com.santos.ravenapi.search.service.FandomServiceRegistry;
 import com.santos.ravenapi.search.service.SearchService;
 
 @SpringBootTest
@@ -22,21 +22,21 @@ import com.santos.ravenapi.search.service.SearchService;
 class RavenApiApplicationTests {
 
 	@Autowired
-	private SearchService service;
+	private SearchService searchService;
 	@Autowired
-	private FandomQueryService fandomQueryService;
-	
+	private FandomServiceRegistry serviceRegistry;
+
 	@Test
 	void throwCharacterNotFoundExceptionTest() {
 		OutputDTO output = null;
 		try {
-			output = service.getCharacterData(PublisherEnum.DC, "asdasda");			
+			output = searchService.getCharacterData(PublisherEnum.DC, "asdasda");
 		} catch (Exception e) {
 			System.out.println(e.getClass());
 		}
 		assertThat(output).isNull();
 	}
-	
+
 	@Test
 	void getCalculatorAppearancesTest() {
 		Optional<List<IssueOutput>> appearances = Optional.empty();
@@ -60,12 +60,12 @@ class RavenApiApplicationTests {
 		assertThat(appearances).isNotEmpty();
 		assertThat(appearances.get()).isNotEmpty();
 	}
-	
+
 	private Optional<List<IssueOutput>> getCharacterAppearances(String character) {
 		long startTime = Instant.now().toEpochMilli();
 		Optional<List<IssueOutput>> appearances = Optional.empty();
 		try {
-			appearances = fandomQueryService.getAppearances(PublisherEnum.DC, character);
+			appearances = serviceRegistry.getService(PublisherEnum.DC).getAppearances(character);
 			appearances.get().forEach(issue -> System.out.printf("%s - %s\r\n", issue.date(), issue.title()));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -73,12 +73,23 @@ class RavenApiApplicationTests {
 		System.err.printf("%.4f s\r\n", (double) (Instant.now().toEpochMilli() - startTime) / 1000);
 		return appearances;
 	}
-	
+
 	@Test
-	void getCharacterDisambiguationsFromFandomTest() {
+	void getCharacterDisambiguationsFromDcFandomTest() {
 		Optional<OutputDTO> output = null;
 		try {
-			output = service.getCharacterDisambiguation(PublisherEnum.DC, "Noah Kuttler");			
+			output = searchService.getCharacterDisambiguation(PublisherEnum.DC, "Noah Kuttler");
+		} catch (Exception e) {
+			System.out.println(e.getClass());
+		}
+		assertThat(output).isPresent();
+	}
+
+	@Test
+	void getCharacterDisambiguationsFromMarvelFandomTest() {
+		Optional<OutputDTO> output = null;
+		try {
+			output = searchService.getCharacterDisambiguation(PublisherEnum.MARVEL, "Mania");
 		} catch (Exception e) {
 			System.out.println(e.getClass());
 		}
