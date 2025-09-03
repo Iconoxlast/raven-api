@@ -29,7 +29,7 @@ public interface CharacterVersionRepository extends JpaRepository<CharacterVersi
 			JOIN character_versions cv ON cd.cver_id=cv.cver_id
 			WHERE ch.char_publ_id=:publId
 			AND ch.char_page_name=:character
-			AND ch.char_latest_update >= :cutoff ORDER BY cv.cver_page_name;
+			AND ch.char_latest_update >= :cutoff;
 			""", nativeQuery = true)
 	List<CharacterVersion> findAllByCharacterNameWithinInterval(@Param("publId") Long publId,
 			@Param("character") String character, @Param("cutoff") LocalDateTime cutoff);

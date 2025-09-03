@@ -57,9 +57,9 @@ public class MarvelQueryService extends FandomQueryService {
 					continue;
 				}
 				Set<String> relatedCharacters = DisambiguationTextFilter.filterParseCharacterNames(content);
-				relatedPages.addAll(character.startsWith("Earth")
-						? relatedCharacters.stream().filter(name -> name.startsWith("Earth")).toList()
-						: relatedCharacters.stream().filter(name -> !name.startsWith("Earth")).toList());
+				relatedPages.addAll(character.startsWith("Earth-")
+						? relatedCharacters.stream().filter(name -> name.startsWith("Earth-")).toList()
+						: relatedCharacters.stream().filter(name -> !name.startsWith("Earth-")).toList());
 			} while (isRedirectPage);
 			if (relatedPages.isEmpty()) {
 				throw new DisambiguationPageNotFoundException();
