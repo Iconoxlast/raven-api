@@ -47,7 +47,8 @@ public class FandomApiClientImpl implements FandomApiClient {
 
 	public FandomDisambiguationDTO queryDisambiguation(PublisherQueryStrategy queryStrategy, String character) {
 		ArgumentValidator.validate(queryStrategy, character);
-		return restTemplate.getForObject(queryStrategy.disambiguationPage(character), FandomDisambiguationDTO.class);
+		return restTemplate.getForObject(queryStrategy.disambiguationPage(character),
+				queryStrategy.getDisambiguationQueryClass());
 	}
 
 }

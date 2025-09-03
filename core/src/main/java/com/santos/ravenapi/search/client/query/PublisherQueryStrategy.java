@@ -3,6 +3,7 @@ package com.santos.ravenapi.search.client.query;
 import java.util.List;
 
 import com.santos.ravenapi.infra.config.AppConfig;
+import com.santos.ravenapi.model.dto.disambiguation.FandomDisambiguationDTO;
 
 public abstract class PublisherQueryStrategy {
 
@@ -38,4 +39,6 @@ public abstract class PublisherQueryStrategy {
 	}
 
 	abstract public String disambiguationPage(String characterAlias);
+	
+	abstract public <T extends FandomDisambiguationDTO> Class<T> getDisambiguationQueryClass();
 }

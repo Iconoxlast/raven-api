@@ -101,8 +101,7 @@ public class DisambiguationServiceImpl implements DisambiguationService {
 	private void saveDisambiguations(Character characterAlias, List<CharacterVersion> characterVersions) {
 		Optional<List<CharacterDisambiguation>> optExistingRecords = disambiguationRepository
 				.findByCharId_CharId(characterAlias.getCharId());
-		List<CharacterDisambiguation> existingRecords = optExistingRecords.isPresent()
-				? optExistingRecords.get()
+		List<CharacterDisambiguation> existingRecords = optExistingRecords.isPresent() ? optExistingRecords.get()
 				: new ArrayList<>();
 		List<CharacterDisambiguation> newDisambiguations = characterVersions.stream().filter(
 				version -> !existingRecords.stream().map(CharacterDisambiguation::getCverId).toList().contains(version))

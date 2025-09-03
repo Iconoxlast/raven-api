@@ -1,4 +1,4 @@
-package com.santos.ravenapi.model.dto.disambiguation;
+package com.santos.ravenapi.model.dto.disambiguation.query;
 
 import java.util.Map;
 

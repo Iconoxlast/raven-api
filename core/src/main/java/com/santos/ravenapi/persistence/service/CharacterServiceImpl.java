@@ -41,7 +41,7 @@ public class CharacterServiceImpl implements CharacterService {
 		characterRepository.saveAllAndFlush(newCharacterAliases.stream()
 				.map(alias -> new Character(null, publisher, alias, LocalDateTime.of(1900, 1, 1, 0, 0))).toList());
 	}
-	
+
 	public void updateCharacterLastUpdate(Character character) {
 		if (AppConfig.DEBUG_MODE) {
 			return;

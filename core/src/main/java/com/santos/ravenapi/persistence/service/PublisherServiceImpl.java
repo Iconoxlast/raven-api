@@ -13,7 +13,7 @@ import com.santos.ravenapi.search.enums.PublisherEnum;
 
 @Service
 public class PublisherServiceImpl implements PublisherService {
-	
+
 	@Autowired
 	private PublisherRepository publisherRepository;
 

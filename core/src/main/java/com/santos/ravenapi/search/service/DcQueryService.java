@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 
 import com.santos.ravenapi.infra.exception.DisambiguationPageNotFoundException;
 import com.santos.ravenapi.infra.validation.ArgumentValidator;
-import com.santos.ravenapi.model.dto.disambiguation.FandomDisambiguationDTO;
-import com.santos.ravenapi.model.dto.disambiguation.Page;
+import com.santos.ravenapi.model.dto.disambiguation.query.Page;
+import com.santos.ravenapi.model.dto.disambiguation.query.QueryActionDTO;
 import com.santos.ravenapi.model.dto.output.DisambiguationOutput;
 import com.santos.ravenapi.search.client.query.DcQueryStrategy;
 import com.santos.ravenapi.search.enums.PublisherEnum;
@@ -26,17 +26,15 @@ public class DcQueryService extends FandomQueryService {
 		super.queryStrategy = new DcQueryStrategy();
 	}
 
-	public Optional<DisambiguationOutput> getDisambiguation(String character)
-			throws SQLException {
-		ArgumentValidator.validate(publisher, character);
+	public Optional<DisambiguationOutput> getDisambiguation(String character) throws SQLException {
+		ArgumentValidator.validate(character);
 		DisambiguationOutput output = null;
 		try {
 			List<String> characterAliases = new ArrayList<>();
 			List<String> characterVersions = new ArrayList<>();
 			boolean isRedirectPage = false;
 			do {
-				FandomDisambiguationDTO disambiguationDto = apiClient.queryDisambiguation(queryStrategy,
-						character);
+				QueryActionDTO disambiguationDto = (QueryActionDTO) apiClient.queryDisambiguation(queryStrategy, character);
 				validateQueriedPage(disambiguationDto.query().pages());
 				Page page = disambiguationDto.query().pages()
 						.get(disambiguationDto.query().pages().keySet().toArray()[0]);
@@ -48,7 +46,7 @@ public class DcQueryService extends FandomQueryService {
 					continue;
 				}
 				validateQueriedPageContent(revisionContent);
-				characterVersions.addAll(DisambiguationTextFilter.filterCharacterNames(revisionContent));
+				characterVersions.addAll(DisambiguationTextFilter.filterQueryCharacterNames(revisionContent));
 			} while (isRedirectPage);
 			if (characterVersions.isEmpty()) {
 				throw new DisambiguationPageNotFoundException();

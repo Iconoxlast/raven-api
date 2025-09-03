@@ -10,7 +10,7 @@ import com.santos.ravenapi.search.enums.PublisherEnum;
 public class FandomServiceRegistry {
 
 	private Map<String, FandomQueryService> services;
-	
+
 	public FandomServiceRegistry(Map<String, FandomQueryService> services) {
 		this.services = services;
 	}
@@ -18,5 +18,5 @@ public class FandomServiceRegistry {
 	public FandomQueryService getService(PublisherEnum publisher) {
 		return services.get(publisher.toString());
 	}
-	
+
 }
