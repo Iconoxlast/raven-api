@@ -15,21 +15,22 @@ public class ExceptionHandlers {
 
 	@ExceptionHandler(CharacterNotFoundException.class)
 	public ResponseEntity<String> treatCharacterNotFoundException(CharacterNotFoundException e) {
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseBodyBuilder.error(HttpStatus.NOT_FOUND.value(),
-				"Not Found",
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).header("Type", "error").body(ResponseBodyBuilder.error(
+				HttpStatus.NOT_FOUND.value(), "Not Found",
 				"Character not found. Verify that the character's name or version is correct and matches the informed publisher."));
 	}
 
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	public ResponseEntity<String> treatInvalidPublisherException(MethodArgumentTypeMismatchException e) {
-		return ResponseEntity.badRequest().body(ResponseBodyBuilder.error(HttpStatus.BAD_REQUEST.value(), "Bad Request",
-				String.format("Invalid or unavailable publisher. Details: %s", e.getMessage())));
+		return ResponseEntity.badRequest().header("Type", "error")
+				.body(ResponseBodyBuilder.error(HttpStatus.BAD_REQUEST.value(), "Bad Request",
+						String.format("Invalid or unavailable publisher. Details: %s", e.getMessage())));
 	}
 
 	@ExceptionHandler(SQLException.class)
 	public ResponseEntity<String> treatSQLException(SQLException e) {
 		e.printStackTrace();
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).header("Type", "error")
 				.body(ResponseBodyBuilder.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error",
 						String.format("Database error. Details: %s", e.getMessage())));
 	}
@@ -37,7 +38,7 @@ public class ExceptionHandlers {
 	@ExceptionHandler(NullPointerException.class)
 	public ResponseEntity<String> treatNullPointerException(NullPointerException e) {
 		e.printStackTrace();
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).header("Type", "error")
 				.body(ResponseBodyBuilder.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error",
 						String.format("Application error. Details: %s", e.getMessage())));
 	}

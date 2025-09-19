@@ -31,6 +31,10 @@ public class SecurityConfigurations {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowedOriginPatterns(List.of("http://127.0.0.1:*", "http://localhost:*"));
+		config.setAllowedMethods(List.of("GET"));
+		config.setAllowedHeaders(List.of("*"));
+		config.setAllowCredentials(true);
+		config.setExposedHeaders(List.of("Type"));
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", config);
 		return source;
