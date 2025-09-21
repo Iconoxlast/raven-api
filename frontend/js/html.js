@@ -1,4 +1,9 @@
-import { viewAppearances, viewDisambiguation, viewError } from "./dom.js";
+import {
+  viewHome,
+  viewAppearances,
+  viewDisambiguation,
+  viewError,
+} from "./dom.js";
 import { navigate } from "./router.js";
 import { setView, buildUrl, getRandomSearchingMessage } from "./util.js";
 
@@ -20,6 +25,9 @@ function withTimeout(ms, signal) {
 }
 
 export async function doSearch({ publisher, character }) {
+  setView(
+    viewHome({ initialPublisher: publisher, initialCharacter: character })
+  );
   const btn = document.querySelector("#btnSearch");
   const status = document.querySelector("#status");
   if (btn) btn.disabled = true;
@@ -72,7 +80,8 @@ export async function doSearch({ publisher, character }) {
   } catch (err) {
     console.log(err);
     const msg =
-      data?.message ?? (err?.name === "AbortError"
+      data?.message ??
+      (err?.name === "AbortError"
         ? "Response time exceeded."
         : "Failed request.");
     setView(viewError({ message: msg }));
@@ -82,4 +91,3 @@ export async function doSearch({ publisher, character }) {
     if (status) status.textContent = "";
   }
 }
-
