@@ -41,7 +41,7 @@ create table character_disambiguations(
 create table issues(
     iss_page_id bigint not null PRIMARY KEY,
     iss_publ_id bigint not null,
-    iss_page_name varchar(100) not null UNIQUE,
+    iss_page_name varchar(100) not null,
     iss_publication_date date not null, 
     FOREIGN KEY (iss_publ_id) REFERENCES publishers(publ_id)
 );
