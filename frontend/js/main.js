@@ -4,3 +4,4 @@ renderFromHash();
 if (!location.hash) {
   navigate("/");
 }
+

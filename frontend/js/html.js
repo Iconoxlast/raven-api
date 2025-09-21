@@ -1,6 +1,6 @@
 import { viewAppearances, viewDisambiguation, viewError } from "./dom.js";
 import { navigate } from "./router.js";
-import { setView, buildUrl } from "./util.js";
+import { setView, buildUrl, getRandomSearchingMessage } from "./util.js";
 
 export const API_BASE = "http://localhost:8080/search";
 
@@ -23,7 +23,7 @@ export async function doSearch({ publisher, character }) {
   const btn = document.querySelector("#btnSearch");
   const status = document.querySelector("#status");
   if (btn) btn.disabled = true;
-  if (status) status.textContent = "Searching...";
+  if (status) status.textContent = getRandomSearchingMessage();
 
   const ac = new AbortController();
   const { signal, cleanup } = withTimeout(300000, ac.signal); // 5m
@@ -31,13 +31,19 @@ export async function doSearch({ publisher, character }) {
   try {
     const url = buildUrl(publisher, character);
     res = await fetch(url, { method: "GET", signal });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     data = await res.json();
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     var responseType = res.headers.get("Type");
 
     switch (responseType) {
       case "disambiguation":
-        setView(viewDisambiguation({ publisher, character, versions: data.characterVersions }));
+        setView(
+          viewDisambiguation({
+            publisher,
+            character,
+            versions: data.characterVersions,
+          })
+        );
         navigate(
           `/search?publisher=${encodeURIComponent(
             publisher
@@ -66,9 +72,9 @@ export async function doSearch({ publisher, character }) {
   } catch (err) {
     console.log(err);
     const msg =
-      err?.name === "AbortError"
+      data?.message ?? (err?.name === "AbortError"
         ? "Response time exceeded."
-        : "Failed request.";
+        : "Failed request.");
     setView(viewError({ message: msg }));
   } finally {
     cleanup();
@@ -76,3 +82,4 @@ export async function doSearch({ publisher, character }) {
     if (status) status.textContent = "";
   }
 }
+
