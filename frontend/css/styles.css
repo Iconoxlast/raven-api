@@ -1,0 +1,155 @@
+:root {
+  --bg: #050c1e;
+  --card: #0a1230;
+  --accent: #8b75e9;
+  --accent-hover: #5240a1;
+  --text: #9892d0;
+  --muted: #aeabca;
+  --input-background: #070f2d;
+  --input-border: #243160;
+}
+html,
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+.container {
+  max-width: 860px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+header {
+  margin-bottom: 24px;
+}
+h1 {
+  font-size: 1.6rem;
+  margin: 0 0 8px;
+}
+p.muted {
+  color: var(--muted);
+  margin: 0 0 24px;
+}
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover,
+a:focus-visible {
+  color: var(--accent-hover);
+}
+.list-link {
+  color: var(--text);
+}
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+}
+form > div {
+  flex: 1 1;
+  min-width: 0;
+}
+#searchForm > div:nth-child(1) {
+  flex: 0 0 160px;
+}
+#searchForm > div:nth-child(2) {
+  flex: 1 1 300px;
+}
+#searchForm > div:nth-child(3) {
+  flex: 0 0 auto;
+}
+label {
+  font-size: 0.9rem;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 6px;
+}
+select,
+input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--input-border);
+  background: var(--input-background);
+  color: var(--text);
+  box-sizing: border-box;
+}
+button {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 0;
+  background: var(--accent);
+  color: #0a1930;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.btn-list {
+  padding: 5px 14px;
+}
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.list {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.list li {
+  padding: 12px;
+  border-bottom: 1px solid #20274a;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.list li:last-child {
+  border-bottom: 0;
+}
+.pill {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.linklike {
+  color: var(--accent);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+.error {
+  color: #ffb4b4;
+}
+.header-disamb {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+.header-disamb h2,
+.header-disamb p {
+  margin: 0;
+}
+footer {
+  margin-top: 28px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}

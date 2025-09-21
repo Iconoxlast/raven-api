@@ -18,6 +18,7 @@ public class ExceptionHandlers {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).header("Type", "error").body(ResponseBodyBuilder.error(
 				HttpStatus.NOT_FOUND.value(), "Not Found",
 				"Character not found. Verify that the character's name or version is correct and matches the informed publisher."));
+
 	}
 
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)

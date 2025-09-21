@@ -7,7 +7,7 @@ public class ResponseBodyBuilder {
 	public synchronized static String error(int status, String error, String message) {
 		return String.format("""
 				{
-					"timestamp": %s,
+					"timestamp": "%s",
 					"status": %d,
 					"error": "%s",
 					"message": "%s"
