@@ -10,7 +10,6 @@ import { setView, buildUrl, getRandomSearchingMessage } from "./util.js";
 export const API_BASE = "http://localhost:8080/search";
 
 function withTimeout(ms, signal) {
-  // combina AbortController externo com timeout
   const ctrl = new AbortController();
   const onAbort = () => ctrl.abort();
   if (signal) signal.addEventListener("abort", onAbort, { once: true });
@@ -26,7 +25,11 @@ function withTimeout(ms, signal) {
 
 export async function doSearch({ publisher, character }) {
   setView(
-    viewHome({ initialPublisher: publisher, initialCharacter: character })
+    viewHome({
+      initialPublisher: publisher,
+      initialCharacter: character,
+      waitScreen: true,
+    })
   );
   const btn = document.querySelector("#btnSearch");
   const status = document.querySelector("#status");

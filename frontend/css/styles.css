@@ -1,12 +1,13 @@
 :root {
-  --bg: #050c1e;
-  --card: #0a1230;
-  --accent: #8b75e9;
-  --accent-hover: #5240a1;
-  --text: #9892d0;
-  --muted: #aeabca;
-  --input-background: #070f2d;
-  --input-border: #243160;
+  --bg: #040810;
+  --card: #24354c;
+  --accent: #bdb040;
+  --accent-hover: #776d13;
+  --text: #677f9c;
+  --muted: #8797ac;
+  --input-background: #172435;
+  --input-border: #37485c;
+  --error-text: #ffb4b4;
 }
 html,
 body {
@@ -87,12 +88,12 @@ button {
   padding: 10px 14px;
   border-radius: 8px;
   border: 0;
-  background: var(--accent);
-  color: #0a1930;
+  color: var(--card);
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
   flex: 0 0 auto;
+  background-image: linear-gradient(var(--accent), var(--accent-hover));
 }
 .btn-list {
   padding: 5px 14px;
@@ -108,7 +109,7 @@ button[disabled] {
 }
 .list li {
   padding: 12px;
-  border-bottom: 1px solid #20274a;
+  border-bottom: 1px solid var(--input-border);
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -119,6 +120,7 @@ button[disabled] {
 .pill {
   font-size: 0.8rem;
   color: var(--muted);
+  font-size: 15px;
 }
 .row {
   display: flex;
@@ -135,7 +137,7 @@ button[disabled] {
   font: inherit;
 }
 .error {
-  color: #ffb4b4;
+  color: var(--error-text);
 }
 .header-disamb {
   display: flex;
@@ -155,4 +157,16 @@ footer {
 }
 #status {
   margin-top: 10px;
+}
+#img-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 400px;
+}
+#img-container img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
 }

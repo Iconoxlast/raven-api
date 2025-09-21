@@ -17,6 +17,8 @@ function updatePlaceholder() {
 export function viewHome({
   initialPublisher = "DC",
   initialCharacter = "",
+  waitScreen = false,
+  errorScreen = false,
 } = {}) {
   const wrap = document.createElement("div");
   wrap.innerHTML = `
@@ -43,6 +45,13 @@ export function viewHome({
   characterInput = wrap.querySelector("#character");
   publisherSelect.value = initialPublisher;
   characterInput.value = initialCharacter;
+  if (!errorScreen) {
+    if (waitScreen) {
+      changeStatusImage("process");
+    } else {
+      changeStatusImage("ini");
+    }
+  }
 
   wrap.querySelector("#searchForm").addEventListener("submit", async (ev) => {
     ev.preventDefault();
@@ -63,12 +72,12 @@ export function viewHome({
 }
 
 export function viewDisambiguation({ publisher, character, versions }) {
+  changeStatusImage("disamb");
   const wrap = document.createElement("div");
-
   const header = document.createElement("div");
   header.className = "header-disamb";
   const h2 = document.createElement("h2");
-  h2.textContent = `Disambiguation — ${ character }`;
+  h2.textContent = `Disambiguation — ${character}`;
   const p = document.createElement("p");
   p.textContent = `Alternate versions and characters related to ${character}`;
   const back = document.createElement("button");
@@ -88,16 +97,14 @@ export function viewDisambiguation({ publisher, character, versions }) {
   versions.forEach((name) => {
     const li = document.createElement("li");
     const left = document.createElement("div");
-    // left.textContent = name;
     left.append(
-        getHyperlink({
-          text: name,
-          url: getFandomPageUrl({ publisher, page: name }),
-        })
-      );
+      getHyperlink({
+        text: name,
+        url: getFandomPageUrl({ publisher, page: name }),
+      })
+    );
     const btn = document.createElement("button");
-    btn.className = "btn-list"
-    // btn.className = "linklike";
+    btn.className = "btn-list";
     btn.textContent = "Search";
     btn.addEventListener("click", () =>
       doSearch({ publisher, character: name })
@@ -111,11 +118,11 @@ export function viewDisambiguation({ publisher, character, versions }) {
 }
 
 export function viewAppearances({ publisher, character, appearancesData }) {
+  changeStatusImage(character === "Raven (New Earth)" ? "new" : "success");
   const wrap = document.createElement("div");
   const header = document.createElement("div");
   header.className = "row";
   const h = document.createElement("h2");
-  // h.textContent = `Appearances — ${character} (${publisher})`;
   h.innerHTML = `Appearances — <a href="${getFandomPageUrl({
     publisher,
     page: character,
@@ -159,10 +166,8 @@ function getAppearancesList({ publisher, appearancesData }) {
     li.append(h1);
     list.append(li);
     issues.forEach((issue) => {
-      //   console.log(` - (${issue.id}) ${issue.title}`);
       li = document.createElement("li");
       var title = document.createElement("div");
-      // title.textContent = issue.title ?? "(no title)";
       title.append(
         getHyperlink({
           text: issue.title,
@@ -192,13 +197,18 @@ function getHyperlink({ text, url }) {
 export function viewError({
   message = "Something went wrong. Please try again.",
 } = {}) {
+  changeStatusImage("error");
   const wrap = document.createElement("div");
   wrap.innerHTML = `
         <h2 class="error">Error</h2>
         <p class="error">${message}</p>
         <hr />
       `;
-  wrap.append(viewHome());
+  wrap.append(viewHome({ errorScreen: true }));
   return wrap;
 }
 
+export function changeStatusImage(status) {
+  var ravenImg = document.querySelector("#img-raven");
+  ravenImg.src = `./images/raven-${status}.webp`;
+}

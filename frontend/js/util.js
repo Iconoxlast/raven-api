@@ -43,7 +43,7 @@ export function getRandomSearchingMessage() {
     "She's extending her mind into the ether, questing for its secrets...",
     "She's peering beyond the veil, sifting through unseen currents for truth...",
     "Her mind is searching the psychic realms for answers...",
-    "Her Soul-Self is venturing the astral realm, seeking hidden knowledge...",
+    "Her Soul-Self is venturing into the astral realm, seeking hidden knowledge...",
   ];
   return (
     "Please wait... " + messages[Math.floor(Math.random() * messages.length)]
