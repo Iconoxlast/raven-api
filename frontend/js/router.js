@@ -1,6 +1,6 @@
 import { viewHome, viewError } from "./dom.js";
 import { setView } from "./util.js";
-import { doSearch } from "./html.js";
+import { doSearch } from "./http.js";
 
 export function navigate(path) {
   // paths: "/", "/search?publisher=...&character=..."

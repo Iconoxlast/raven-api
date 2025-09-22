@@ -1,4 +1,4 @@
-import { doSearch } from "./html.js";
+import { doSearch } from "./http.js";
 import { navigate } from "./router.js";
 import { formatYearMonth, getFandomPageUrl } from "./util.js";
 

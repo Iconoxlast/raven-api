@@ -1,4 +1,4 @@
-import { API_BASE } from "./html.js";
+import { API_BASE } from "./http.js";
 
 export const $app = document.getElementById("app");
 
