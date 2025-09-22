@@ -91,9 +91,13 @@ export function viewDisambiguation({ publisher, character, versions }) {
   headerBottom.append(p);
   header.append(headerTop, headerBottom);
 
+  wrap.append(header, getDisambiguationList({ publisher, versions }));
+  return wrap;
+}
+
+function getDisambiguationList({ publisher, versions }) {
   const list = document.createElement("ul");
   list.className = "list";
-
   versions.forEach((name) => {
     const li = document.createElement("li");
     const left = document.createElement("div");
@@ -112,8 +116,9 @@ export function viewDisambiguation({ publisher, character, versions }) {
     li.append(left, btn);
     list.append(li);
   });
-
-  wrap.append(header, list);
+  const wrap = document.createElement("div");
+  wrap.className = "results";
+  wrap.append(list);
   return wrap;
 }
 
@@ -181,7 +186,11 @@ function getAppearancesList({ publisher, appearancesData }) {
       list.append(li);
     });
   }
-  return list;
+  const wrap = document.createElement("div");
+  wrap.className = "results";
+  wrap.append(list);
+
+  return wrap;
 }
 
 function getHyperlink({ text, url }) {

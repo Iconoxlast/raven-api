@@ -7,6 +7,8 @@
   --muted: #8797ac;
   --input-background: #172435;
   --input-border: #37485c;
+  --scroll-bg: #344863;
+  --scroll-thumb: #19283a;
   --error-text: #ffb4b4;
 }
 html,
@@ -48,6 +50,11 @@ a:focus-visible {
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.results {
+  max-height: 75vh;
+  overflow: auto;
+  scrollbar-color: var(--scroll-thumb) var(--scroll-bg);
 }
 form {
   display: flex;
