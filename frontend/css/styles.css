@@ -105,6 +105,9 @@ button {
 .btn-list {
   padding: 5px 14px;
 }
+#btn-download {
+  margin-left: 10px;
+}
 button[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
@@ -176,4 +179,29 @@ footer {
   height: auto;
   display: block;
   object-fit: contain;
+}
+#flash {
+  opacity: 0;
+}
+#flash p {
+  font-size: 20px;
+  color: white;
+}
+.flash--animate {
+  animation: flashOut 3s ease-out forwards;
+}
+
+@keyframes flashOut {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }

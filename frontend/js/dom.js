@@ -1,9 +1,11 @@
 import { doSearch } from "./http.js";
 import { navigate } from "./router.js";
 import { formatYearMonth, getFandomPageUrl } from "./util.js";
+import { getAppearancesListTxt } from "./files.js";
 
 export var publisherSelect;
 export var characterInput;
+export var searchedCharacter;
 
 function updatePlaceholder() {
   const map = {
@@ -123,6 +125,7 @@ function getDisambiguationList({ publisher, versions }) {
 }
 
 export function viewAppearances({ publisher, character, appearancesData }) {
+  searchedCharacter = character;
   changeStatusImage(character === "Raven (New Earth)" ? "new" : "success");
   const wrap = document.createElement("div");
   const header = document.createElement("div");
@@ -132,11 +135,10 @@ export function viewAppearances({ publisher, character, appearancesData }) {
     publisher,
     page: character,
   })}" target="_blank" rel="noopener noreferrer">${character}</a> (${publisher})`;
-  const back = document.createElement("button");
-  back.className = "linklike";
-  back.textContent = "← New search";
-  back.addEventListener("click", () => navigate("/"));
-  header.append(h, back);
+
+  const flash = document.createElement("div");
+  flash.id = "flash";
+  header.append(h, getBackButton(), getDownloadButton(), flash);
 
   if (!appearancesData?.length) {
     wrap.append(header, getNoAppearanceFoundMessage);
@@ -160,10 +162,12 @@ function getNoAppearanceFoundMessage() {
 function getAppearancesList({ publisher, appearancesData }) {
   const list = document.createElement("ul");
   list.className = "list";
+  list.id = "appearances";
 
   for (const [publicationMonth, issues] of appearancesData) {
     var li = document.createElement("li");
     var h1 = document.createElement("h1");
+    li.className = "month";
     h1.textContent =
       publicationMonth === "1900-01"
         ? "Undefined"
@@ -172,7 +176,9 @@ function getAppearancesList({ publisher, appearancesData }) {
     list.append(li);
     issues.forEach((issue) => {
       li = document.createElement("li");
+      li.className = "issue";
       var title = document.createElement("div");
+      title.className = "title";
       title.append(
         getHyperlink({
           text: issue.title,
@@ -191,6 +197,22 @@ function getAppearancesList({ publisher, appearancesData }) {
   wrap.append(list);
 
   return wrap;
+}
+
+function getBackButton() {
+  const back = document.createElement("button");
+  back.className = "linklike";
+  back.textContent = "← New search";
+  back.addEventListener("click", () => navigate("/"));
+  return back;
+}
+
+function getDownloadButton() {
+  const download = document.createElement("button");
+  download.id = "btn-download";
+  download.textContent = "💾 Download";
+  download.addEventListener("click", () => getAppearancesListTxt());
+  return download;
 }
 
 function getHyperlink({ text, url }) {
@@ -220,4 +242,24 @@ export function viewError({
 export function changeStatusImage(status) {
   var ravenImg = document.querySelector("#img-raven");
   ravenImg.src = `./images/raven-${status}.webp`;
+}
+
+export function showFlash(text) {
+  const flash = document.getElementById("flash");
+  const message = document.createElement("p");
+  message.textContent = text;
+  flash.appendChild(message);
+  flash.classList.remove("flash--animate");
+  void flash.offsetWidth;
+  flash.classList.add("flash--animate");
+
+  flash.addEventListener(
+    "animationend",
+    () => {
+      flash.classList.remove("flash--animate");
+      flash.removeChild(message);
+      flash.textContent = "";
+    },
+    { once: true }
+  );
 }
